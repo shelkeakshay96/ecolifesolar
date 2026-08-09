@@ -1,0 +1,85 @@
+<?php
+/**
+ * About page.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+$business = $block->getSetting('general/business/name', 'Eco Life');
+
+$principles = [
+    ['title' => 'We survey before we quote',
+     'text'  => 'Shading changes through the day and through the year, and a roof that looks '
+              . 'fine in a photograph often is not. We visit, we measure, and only then do we '
+              . 'put a number on paper.'],
+    ['title' => 'We will tell you not to buy',
+     'text'  => 'If your consumption is low, or your roof is heavily shaded, or a water heater '
+              . 'would save you more than panels would, we will say so. A system that '
+              . 'disappoints is worse for us than a sale we did not make.'],
+    ['title' => 'We stay reachable',
+     'text'  => 'Installation is the beginning of a twenty-five year relationship with a piece '
+              . 'of equipment on your roof. Being local is the whole point.'],
+];
+?>
+<section class="relative overflow-hidden border-b border-gold-300/30 bg-pine-900">
+    <div class="absolute inset-0 scale-110 bg-cover bg-center opacity-25"
+         style="background-image:url('<?= $block->escapeUrl($block->getStaticUrl('images/panels2.jpg')) ?>')"
+         data-parallax="0.08" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-pine-900/90 to-pine-900" aria-hidden="true"></div>
+
+    <div class="section-shell relative z-10 max-w-3xl py-20 lg:py-24">
+        <p class="eyebrow reveal text-gold-300"><span class="opacity-60">/02</span> Why Eco Life</p>
+        <h1 class="reveal mt-3 text-4xl text-pearl sm:text-5xl" data-word-reveal>
+            A family business, <em class="italic text-gold-300">in Satara.</em>
+        </h1>
+        <div class="gold-rule"></div>
+        <p class="reveal max-w-2xl text-[1.02rem] leading-relaxed text-pine-100/90">
+            <?= $block->escapeHtml($business) ?> installs rooftop solar across Satara and the
+            surrounding district. We are small on purpose: the people who survey your roof are
+            the people who install the system, and the people who come back if something needs
+            attention.
+        </p>
+    </div>
+</section>
+
+<section class="border-b border-sand bg-pearl-dim">
+    <div class="section-shell py-16 lg:py-20">
+        <h2 class="reveal text-3xl">How we work</h2>
+
+        <div class="mt-10 grid gap-6 lg:grid-cols-3" data-reveal-stagger="110">
+            <?php foreach ($principles as $principle): ?>
+                <div class="reveal card card-lift border-t-2 border-t-gold-500">
+                    <h3 class="text-[1.05rem]"><?= $block->escapeHtml($principle['title']) ?></h3>
+                    <p class="mt-3 text-[.88rem] leading-relaxed text-muted">
+                        <?= $block->escapeHtml($principle['text']) ?>
+                    </p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<section class="bg-pearl">
+    <div class="section-shell max-w-3xl py-16 lg:py-20">
+        <p class="eyebrow reveal"><span class="opacity-60">/03</span> How it works</p>
+        <h2 class="reveal mt-3 text-3xl">What happens next</h2>
+
+        <ol class="mt-10 space-y-7" data-reveal-stagger="100">
+            <?php foreach ($block->getProcess() as $stage): ?>
+                <li class="reveal flex gap-5">
+                    <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+                                 border border-gold-500 font-mono text-[.75rem] text-gold-600">
+                        <?= $block->escapeHtml($stage['step']) ?>
+                    </span>
+                    <div>
+                        <h3 class="text-[1.05rem]"><?= $block->escapeHtml($stage['title']) ?></h3>
+                        <p class="mt-1.5 text-[.9rem] leading-relaxed text-muted"><?= $block->escapeHtml($stage['text']) ?></p>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+
+        <div class="reveal mt-12">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.2">Book a free site visit</a>
+        </div>
+    </div>
+</section>

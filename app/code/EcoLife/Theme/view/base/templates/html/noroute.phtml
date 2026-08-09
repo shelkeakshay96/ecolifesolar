@@ -1,0 +1,30 @@
+<?php
+/**
+ * 404 body. Lives in base/, so the same content is wrapped in the public
+ * layout on the frontend and in the admin layout under /admin -- which is the
+ * whole reason 404s render through the normal page pipeline rather than being
+ * special-cased.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+?>
+<section class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-widest text-brand-500">404</p>
+    <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+        We couldn't find that page
+    </h1>
+    <p class="mt-4 text-base">
+        The link may be out of date, or the address may have been mistyped.
+    </p>
+
+    <?php if (!$block->isAdminArea()): ?>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a href="/" class="btn-primary">Back to home</a>
+            <a href="/contact" class="btn-secondary">Request a quote</a>
+        </div>
+    <?php else: ?>
+        <div class="mt-8">
+            <a href="<?= $block->escapeUrl($block->getUrl()) ?>" class="btn-primary">Back to dashboard</a>
+        </div>
+    <?php endif; ?>
+</section>

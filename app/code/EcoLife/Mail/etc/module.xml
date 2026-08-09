@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    Outbound email.
+
+    The transport is abstracted from day one, and that is not architecture for
+    its own sake: a fresh server IP has no sending reputation, so production
+    mail will need an external SMTP relay with SPF and DKIM. Making that a
+    configuration change rather than a code change is the entire point.
+-->
+<module name="EcoLife_Mail" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+    </sequence>
+</module>

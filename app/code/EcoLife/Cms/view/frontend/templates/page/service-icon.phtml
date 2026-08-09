@@ -1,0 +1,45 @@
+<?php
+/**
+ * One line-art icon per service, selected by the `icon` key that
+ * Cms\Block\Page::getServices() already carries.
+ *
+ * This exists as its own template rather than as a PHP string of markup in a
+ * block because bin/ecolife lint:templates only trusts a short list of escapers
+ * and renderChild(). Returning SVG from a getter would mean either echoing it
+ * raw -- which the linter would flag, correctly -- or widening that list.
+ * Markup belongs in a template; this keeps it there and lets the home page and
+ * the services page share it.
+ *
+ * Colour comes from currentColor, so the caller decides.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+$icon  = (string) $block->getData('icon', 'panel');
+$class = (string) $block->getData('class', 'h-14 w-14');
+?>
+<svg viewBox="0 0 64 64" class="<?= $block->escapeHtmlAttr($class) ?>" fill="none" aria-hidden="true">
+    <?php if ($icon === 'heater'): ?>
+        <circle cx="32" cy="11" r="6" fill="currentColor" opacity=".9"/>
+        <path d="M32 2v3M42 6l-2 2.5M22 6l2 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <rect x="12" y="26" width="40" height="16" rx="8" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M19 30v8M27 30v8M35 30v8M43 30v8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M19 46c0 6 26 6 26 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M28 52c-4 2-4 6 0 8 4-2 4-6 0-8Z" fill="currentColor" opacity=".55"/>
+    <?php elseif ($icon === 'battery'): ?>
+        <rect x="18" y="12" width="28" height="42" rx="4" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="27" y="7" width="10" height="6" rx="1.5" fill="currentColor"/>
+        <rect x="23" y="34" width="18" height="14" rx="2" fill="currentColor" opacity=".25"/>
+        <rect x="23" y="34" width="11" height="14" rx="2" fill="currentColor" opacity=".7"/>
+        <path d="M34 17l-7 12h6l-4 10 12-14h-7l4-8Z" fill="currentColor"/>
+    <?php elseif ($icon === 'bolt'): ?>
+        <circle cx="32" cy="32" r="24" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M32 12v6M32 46v6M12 32h6M46 32h6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <path d="M35 19l-9 15h7l-3 11 12-17h-8l4-9Z" fill="currentColor"/>
+    <?php else: ?>
+        <rect x="6" y="15" width="52" height="29" rx="3" stroke="currentColor" stroke-width="2.5"/>
+        <path d="M6 24.6h52M6 34.3h52M23.3 15v29M40.6 15v29" stroke="currentColor" stroke-width="1.5" opacity=".6"/>
+        <path d="M32 44v9M22 53h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="52" cy="8" r="4" fill="currentColor" opacity=".9"/>
+        <path d="M52 1v2M58.5 4.5l-1.4 1.4M45.5 4.5l1.4 1.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <?php endif; ?>
+</svg>

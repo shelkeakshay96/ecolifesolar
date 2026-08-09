@@ -1,0 +1,110 @@
+<?php
+/**
+ * Contact page.
+ *
+ * The lead form is rendered into the slot below by an explicit renderChild()
+ * call. Every contact detail beside it comes from core_config, so the family
+ * corrects it themselves from /admin/settings.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+$phone    = $block->getSetting('general/contact/phone');
+$email    = $block->getSetting('general/contact/email');
+$address  = $block->getSetting('general/contact/address');
+$hours    = $block->getSetting('general/contact/hours');
+$whatsapp = $block->getWhatsappLink();
+?>
+<section class="border-b border-sand bg-pearl-dim">
+    <div class="section-shell max-w-3xl py-16 lg:py-20">
+        <p class="eyebrow reveal">Ready when you are</p>
+        <h1 class="reveal mt-3 text-4xl sm:text-5xl">Request a free site visit</h1>
+        <p class="reveal mt-5 text-[1.02rem] leading-relaxed text-muted">
+            Tell us roughly what you spend on electricity each month and what your roof is like.
+            We will arrange a visit, look properly, and give you a written estimate. There is no
+            charge and no obligation.
+        </p>
+    </div>
+</section>
+
+<section class="bg-pearl">
+    <div class="section-shell grid gap-10 py-16 lg:grid-cols-5 lg:py-20">
+
+        <div class="reveal lg:col-span-3">
+            <?php /* Cross-module composition: an explicit call, not a configured reference. */ ?>
+            <?= $block->renderChild(\EcoLife\Lead\Block\Form::class,
+                                    'EcoLife_Lead::form/lead.phtml',
+                                    ['source' => 'contact']) ?>
+        </div>
+
+        <aside class="reveal reveal-right lg:col-span-2">
+            <div class="card-dark">
+                <h2 class="font-mono text-[.72rem] uppercase tracking-[.1em] text-gold-300">Reach us directly</h2>
+                <dl class="mt-5 space-y-4 text-[.92rem]">
+                    <?php if ($phone !== ''): ?>
+                        <div>
+                            <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/50">Phone</dt>
+                            <dd class="mt-1">
+                                <a class="transition hover:text-pearl" href="tel:<?= $block->escapeHtmlAttr(preg_replace('/\s+/', '', $phone)) ?>">
+                                    <?= $block->escapeHtml($phone) ?>
+                                </a>
+                            </dd>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($email !== ''): ?>
+                        <div>
+                            <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/50">Email</dt>
+                            <dd class="mt-1">
+                                <a class="transition hover:text-pearl" href="mailto:<?= $block->escapeHtmlAttr($email) ?>">
+                                    <?= $block->escapeHtml($email) ?>
+                                </a>
+                            </dd>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($address !== ''): ?>
+                        <div>
+                            <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/50">Address</dt>
+                            <dd class="mt-1 leading-relaxed"><?= $block->escapeHtml($address) ?></dd>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($hours !== ''): ?>
+                        <div>
+                            <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/50">Hours</dt>
+                            <dd class="mt-1"><?= $block->escapeHtml($hours) ?></dd>
+                        </div>
+                    <?php endif; ?>
+                </dl>
+
+                <?php if ($whatsapp !== ''): ?>
+                    <a href="<?= $block->escapeUrl($whatsapp) ?>" target="_blank" rel="noopener"
+                       class="btn-gold btn-compact mt-6 w-full">Message us on WhatsApp</a>
+                <?php endif; ?>
+            </div>
+
+            <div class="card mt-6">
+                <h2 class="text-[1rem]">Where we work</h2>
+                <p class="mt-2.5 text-[.88rem] leading-relaxed text-muted">
+                    Satara city and district, including Karad, Wai, Phaltan and the surrounding
+                    villages. If you are just outside, ask anyway.
+                </p>
+            </div>
+
+            <div class="card mt-6">
+                <h2 class="text-[1rem]">What happens after you send this</h2>
+                <ol class="mt-3 space-y-2.5 text-[.88rem] text-muted">
+                    <li class="flex gap-2.5">
+                        <span class="font-mono text-[.72rem] text-gold-600">01</span>
+                        <span>We call you back, usually the same day.</span>
+                    </li>
+                    <li class="flex gap-2.5">
+                        <span class="font-mono text-[.72rem] text-gold-600">02</span>
+                        <span>We agree a time and come and look at the roof.</span>
+                    </li>
+                    <li class="flex gap-2.5">
+                        <span class="font-mono text-[.72rem] text-gold-600">03</span>
+                        <span>You get a written estimate. Nothing is ordered until you say so.</span>
+                    </li>
+                </ol>
+            </div>
+        </aside>
+    </div>
+</section>

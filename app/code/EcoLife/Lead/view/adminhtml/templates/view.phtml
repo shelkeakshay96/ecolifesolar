@@ -1,0 +1,147 @@
+<?php
+/**
+ * Single enquiry: details, the status form, and the audit trail.
+ *
+ * @var \EcoLife\Lead\Block\Adminhtml\View $block
+ */
+$lead     = $block->getLead();
+$history  = $block->getHistory();
+$whatsapp = $lead->getWhatsappLink();
+?>
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="text-sm text-slate-500 hover:text-slate-900">
+        &larr; All enquiries
+    </a>
+
+    <div class="mt-3 flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900"><?= $block->escapeHtml($lead->getName()) ?></h1>
+            <p class="mt-1 text-sm text-slate-500">
+                <?= $block->escapeHtml($lead->getTypeLabel()) ?> enquiry from
+                <?= $block->escapeHtml($lead->getCity()) ?>,
+                received <?= $block->escapeHtml($block->formatDate((string) $lead->getData('created_at'), 'd M Y \a\t H:i')) ?>
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a href="tel:<?= $block->escapeHtmlAttr($lead->getPhone()) ?>" class="btn-primary text-sm">
+                Call <?= $block->escapeHtml($lead->getPhone()) ?>
+            </a>
+            <?php if ($whatsapp !== ''): ?>
+                <a href="<?= $block->escapeUrl($whatsapp) ?>" target="_blank" rel="noopener" class="btn-secondary text-sm">WhatsApp</a>
+            <?php endif; ?>
+            <?php if ($lead->getEmail() !== ''): ?>
+                <a href="mailto:<?= $block->escapeHtmlAttr($lead->getEmail()) ?>" class="btn-secondary text-sm">Email</a>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-3">
+
+        <div class="lg:col-span-2">
+            <div class="card p-0">
+                <h2 class="border-b border-slate-200 px-6 py-4 text-base font-semibold text-slate-900">Details</h2>
+                <dl class="divide-y divide-slate-100">
+                    <?php foreach ($block->getDetailRows() as $label => $value): ?>
+                        <div class="grid grid-cols-3 gap-4 px-6 py-3 text-sm">
+                            <dt class="text-slate-400"><?= $block->escapeHtml($label) ?></dt>
+                            <dd class="col-span-2 text-slate-700"><?= $block->escapeHtml($value) ?></dd>
+                        </div>
+                    <?php endforeach; ?>
+                </dl>
+            </div>
+
+            <div class="card mt-6 p-0">
+                <h2 class="border-b border-slate-200 px-6 py-4 text-base font-semibold text-slate-900">History</h2>
+                <?php if ($history === []): ?>
+                    <p class="px-6 py-6 text-sm text-slate-500">No changes recorded yet.</p>
+                <?php else: ?>
+                    <ol class="divide-y divide-slate-100">
+                        <?php foreach ($history as $entry): ?>
+                            <li class="px-6 py-3 text-sm">
+                                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                                    <span>
+                                        <span class="text-slate-400"><?= $block->escapeHtml($entry->getFromLabel()) ?></span>
+                                        <span class="mx-1 text-slate-300">&rarr;</span>
+                                        <span class="font-medium text-slate-900"><?= $block->escapeHtml($entry->getToLabel()) ?></span>
+                                    </span>
+                                    <span class="text-xs text-slate-400">
+                                        <?= $block->escapeHtml($entry->getActorName()) ?>,
+                                        <?= $block->escapeHtml($block->formatDate((string) $entry->getData('created_at'), 'd M Y H:i')) ?>
+                                    </span>
+                                </div>
+                                <?php if ($comment = (string) $entry->getData('comment')): ?>
+                                    <p class="mt-1 text-slate-600"><?= $block->escapeHtml($comment) ?></p>
+                                <?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div>
+            <form method="post" action="<?= $block->escapeUrl($block->getStatusUrl()) ?>" class="card">
+                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+                <h2 class="text-base font-semibold text-slate-900">Update</h2>
+
+                <div class="mt-4">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-input" id="status" name="status">
+                        <?php foreach ($block->getStatusOptions() as $value => $label): ?>
+                            <option value="<?= $block->escapeHtmlAttr($value) ?>"
+                                <?= $block->escapeHtmlAttr($lead->getStatus() === $value ? 'selected' : '') ?>>
+                                <?= $block->escapeHtml($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label" for="priority">Priority</label>
+                    <select class="form-input" id="priority" name="priority">
+                        <?php foreach ($block->getPriorityOptions() as $value => $label): ?>
+                            <option value="<?= $block->escapeHtmlAttr($value) ?>"
+                                <?= $block->escapeHtmlAttr((string) $lead->getData('priority') === $value ? 'selected' : '') ?>>
+                                <?= $block->escapeHtml($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label" for="next_followup_at">Next follow-up</label>
+                    <input class="form-input" id="next_followup_at" name="next_followup_at" type="date"
+                           value="<?= $block->escapeHtmlAttr(substr((string) $lead->getData('next_followup_at'), 0, 10)) ?>">
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label" for="comment">Note for the history</label>
+                    <input class="form-input" id="comment" name="comment" type="text" maxlength="500"
+                           placeholder="e.g. Called, visiting Tuesday">
+                </div>
+
+                <div class="mt-4">
+                    <label class="form-label" for="admin_notes">Internal notes</label>
+                    <textarea class="form-input" id="admin_notes" name="admin_notes" rows="4"><?= $block->escapeHtml((string) $lead->getData('admin_notes')) ?></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary mt-5 w-full">Save changes</button>
+            </form>
+
+            <form method="post" action="<?= $block->escapeUrl($block->getDeleteUrl()) ?>" class="card mt-6"
+                  onsubmit="return confirm('Delete this enquiry permanently? This cannot be undone.');">
+                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                <h2 class="text-base font-semibold text-slate-900">Delete</h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Removes the enquiry and its history. Mark it as Junk instead if you may want it later.
+                </p>
+                <button type="submit" class="btn-secondary mt-4 w-full border-red-200 text-red-700 hover:bg-red-50">
+                    Delete enquiry
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

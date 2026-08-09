@@ -1,0 +1,36 @@
+<?php
+/**
+ * Admin sign-in.
+ *
+ * @var \EcoLife\Backend\Block\Adminhtml\Login $block
+ */
+?>
+<section class="mx-auto flex max-w-md flex-col justify-center px-4 py-16 sm:py-24">
+    <div class="text-center">
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">EcoLifeSolar</h1>
+        <p class="mt-1 text-sm text-slate-500">Sign in to manage enquiries</p>
+    </div>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getPostUrl()) ?>" class="card mt-8">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+        <div>
+            <label for="username" class="form-label">Username</label>
+            <input id="username" name="username" type="text" class="form-input" required
+                   autocomplete="username" autofocus maxlength="50">
+        </div>
+
+        <div class="mt-4">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" name="password" type="password" class="form-input" required
+                   autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary mt-6 w-full">Sign in</button>
+
+        <p class="mt-4 text-center text-xs text-slate-400">
+            Accounts are created from the command line with
+            <span class="font-mono">bin/ecolife admin:user:create</span>.
+        </p>
+    </form>
+</section>

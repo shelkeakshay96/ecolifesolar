@@ -1,0 +1,102 @@
+<?php
+/**
+ * Public gallery.
+ *
+ * Each photograph opens in the lightbox in app.js. The trigger is a real
+ * <button>, not a div with an onclick as on the original site: the CSP forbids
+ * the inline handler, and a button is the only version of this that a keyboard
+ * can reach.
+ *
+ * @var \EcoLife\Gallery\Block\Grid $block
+ */
+$items   = $block->getItems();
+$current = $block->getCategory();
+?>
+<section class="border-b border-sand bg-pearl-dim">
+    <div class="section-shell max-w-3xl py-16 lg:py-20">
+        <p class="eyebrow reveal"><span class="opacity-60">/06</span> Our work</p>
+        <h1 class="reveal mt-3 text-4xl sm:text-5xl">Recent installations</h1>
+        <p class="reveal mt-5 text-[1.02rem] leading-relaxed text-muted">
+            Systems we have designed and installed across Satara district — homes,
+            housing societies and commercial roofs.
+        </p>
+    </div>
+</section>
+
+<section class="bg-pearl">
+    <div class="section-shell py-14">
+
+        <nav class="reveal flex flex-wrap gap-2" aria-label="Filter by type">
+            <a href="<?= $block->escapeUrl($block->getCategoryUrl('')) ?>"
+               class="rounded-full px-4 py-2 font-mono text-[.74rem] transition <?= $block->escapeHtmlAttr($current === ''
+                   ? 'bg-pine-800 text-pearl' : 'border border-sand-dark bg-white text-muted hover:border-gold-400') ?>">
+                All
+            </a>
+            <?php foreach ($block->getCategories() as $value => $label): ?>
+                <a href="<?= $block->escapeUrl($block->getCategoryUrl($value)) ?>"
+                   class="rounded-full px-4 py-2 font-mono text-[.74rem] transition <?= $block->escapeHtmlAttr($current === $value
+                       ? 'bg-pine-800 text-pearl' : 'border border-sand-dark bg-white text-muted hover:border-gold-400') ?>">
+                    <?= $block->escapeHtml($label) ?>
+                </a>
+            <?php endforeach; ?>
+        </nav>
+
+        <?php if ($items === []): ?>
+            <div class="card mt-10 text-center">
+                <p class="text-sm text-muted">
+                    No photographs here yet. They are added from the admin panel as projects are completed.
+                </p>
+                <a href="/contact" class="btn-gold mt-6">Ask about your roof</a>
+            </div>
+        <?php else: ?>
+            <div class="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3" data-reveal-stagger="80">
+                <?php foreach ($items as $item): ?>
+                    <?php $meta = array_filter([$item->getSizeLabel(), $item->getLocation(), $item->getCategoryLabel()]); ?>
+                    <figure class="reveal">
+                        <?php if ($item->imageExists()): ?>
+                            <button type="button"
+                                    class="group relative block w-full cursor-zoom-in overflow-hidden rounded-2xl
+                                           border border-sand bg-pearl-dim"
+                                    data-lightbox
+                                    data-lightbox-src="<?= $block->escapeUrl($block->getMediaUrl($item->getImagePath())) ?>"
+                                    data-lightbox-alt="<?= $block->escapeHtmlAttr($item->getTitle()) ?>"
+                                    data-lightbox-caption="<?= $block->escapeHtmlAttr($item->getTitle() . ($meta ? ' — ' . implode(' · ', $meta) : '')) ?>">
+                                <span class="sr-only">View <?= $block->escapeHtml($item->getTitle()) ?> full size</span>
+                                <img src="<?= $block->escapeUrl($block->getMediaUrl((string) ($item->getData('thumbnail_path') ?: $item->getImagePath()))) ?>"
+                                     alt="<?= $block->escapeHtmlAttr($item->getTitle()) ?>"
+                                     class="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-105"
+                                     loading="lazy">
+                                <span class="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center
+                                             rounded-full bg-pine-900/75 text-pearl opacity-0 transition group-hover:opacity-100">⤢</span>
+                            </button>
+                        <?php else: ?>
+                            <div class="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border border-sand
+                                        bg-pearl-dim text-xs text-muted/70">
+                                Image unavailable
+                            </div>
+                        <?php endif; ?>
+
+                        <figcaption class="mt-3.5">
+                            <h2 class="text-[1rem]"><?= $block->escapeHtml($item->getTitle()) ?></h2>
+                            <p class="mt-1 font-mono text-[.7rem] tracking-[.03em] text-muted">
+                                <?= $block->escapeHtml(implode(' · ', $meta)) ?>
+                            </p>
+                            <?php if ($description = (string) $item->getData('description')): ?>
+                                <p class="mt-2 text-[.86rem] leading-relaxed text-muted"><?= $block->escapeHtml($description) ?></p>
+                            <?php endif; ?>
+                        </figcaption>
+                    </figure>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<section class="border-y border-gold-300/30 bg-gradient-to-br from-pine-500 to-pine-900 text-center">
+    <div class="section-shell py-16">
+        <h2 class="reveal mx-auto max-w-[22ch] text-3xl text-pearl">Could your roof be next?</h2>
+        <div class="reveal mt-7">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.22">Book a free site visit →</a>
+        </div>
+    </div>
+</section>

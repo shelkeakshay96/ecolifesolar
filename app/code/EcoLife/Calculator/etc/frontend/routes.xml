@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<routes>
+    <route id="calculator" frontName="calculator">
+        <module name="EcoLife_Calculator"/>
+    </route>
+</routes>

@@ -1,0 +1,43 @@
+<?php
+/**
+ * Admin header. Step 7 replaces the placeholder right-hand side with the
+ * signed-in user and a sign-out link.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+$current = $block->getRequest()->getPathInfo();
+
+$links = [
+    ''        => 'Dashboard',
+    'leads'    => 'Leads',
+    'gallery' => 'Gallery',
+    'settings' => 'Settings',
+];
+?>
+<header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+
+        <div class="flex items-center gap-6">
+            <a href="<?= $block->escapeUrl($block->getUrl()) ?>" class="flex items-center gap-2">
+                <span class="text-base font-semibold text-slate-900">EcoLifeSolar</span>
+                <span class="rounded bg-slate-900 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white">Admin</span>
+            </a>
+
+            <nav class="hidden items-center gap-1 md:flex" aria-label="Admin">
+                <?php foreach ($links as $path => $label): ?>
+                    <?php $href = $block->getUrl($path); ?>
+                    <a href="<?= $block->escapeUrl($href) ?>"
+                       class="rounded-lg px-3 py-2 text-sm font-medium transition <?= $block->escapeHtmlAttr(str_starts_with($current, '/' . $path) && $path !== ''
+                           ? 'bg-slate-100 text-slate-900'
+                           : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900') ?>">
+                        <?= $block->escapeHtml($label) ?>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3 text-sm">
+            <a href="/" target="_blank" rel="noopener" class="text-slate-500 hover:text-slate-900">View site</a>
+        </div>
+    </div>
+</header>

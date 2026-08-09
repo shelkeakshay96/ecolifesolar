@@ -1,0 +1,26 @@
+# Secrets -- the only file in the project holding a password.
+/app/etc/env.php
+
+# Runtime state
+/var/log/*
+/var/session/*
+/var/tmp/*
+!/var/log/.gitkeep
+!/var/session/.gitkeep
+!/var/tmp/.gitkeep
+
+# Tailwind standalone binary (~100 MB, fetched by bin/tailwind-install.sh)
+/tools/tailwindcss
+
+# Uploaded media
+/pub/media/*
+!/pub/media/.gitkeep
+
+# Documentation build venv
+/docs/.venv/
+
+# Editor / OS noise
+.idea/
+.vscode/
+*.swp
+.DS_Store

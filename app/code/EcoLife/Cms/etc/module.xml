@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    Home, About, Services and Contact.
+
+    EcoLife_Cms owns no database table and never will. Pages are a whitelist in
+    etc/pages.php plus a template each, which is the right shape for six pages
+    that change a few times a year. The moment it needs persistence, that is a
+    sign the content belongs in a module that already has a table.
+-->
+<module name="EcoLife_Cms" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+        <module name="EcoLife_Theme"/>
+    </sequence>
+</module>

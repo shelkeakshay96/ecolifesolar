@@ -1,0 +1,257 @@
+<?php
+/**
+ * Home page.
+ *
+ * The shape of this page is Piyush's v3.1 static site: split hero with the
+ * enquiry form beside the headline, solutions, trust strip, four-step process,
+ * the streetlight scene and a closing quote banner. What is different is that
+ * the form posts to a controller instead of faking a "Thank you", and every
+ * repeated element comes out of a block rather than being written twice.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+$whatsapp = $block->getWhatsappLink();
+$services = $block->getServices();
+$featured = array_shift($services);
+?>
+
+<?php /* ============================================================ hero */ ?>
+<section class="grid lg:grid-cols-[1.1fr_1fr]" data-leaf-zone>
+
+    <div class="relative flex flex-col justify-center overflow-hidden px-6 py-20 sm:px-10 lg:px-14 lg:py-28">
+        <?php /* The photograph drifts a little slower than the page. */ ?>
+        <div class="absolute inset-0 scale-110 bg-cover bg-center will-change-transform"
+             style="background-image:url('<?= $block->escapeUrl($block->getStaticUrl('images/panels.jpg')) ?>')"
+             data-parallax="0.10" aria-hidden="true"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-pine-900/95 via-pine-900/90 to-pine-900/80" aria-hidden="true"></div>
+
+        <div class="relative z-10 max-w-xl">
+            <p class="eyebrow text-gold-300">
+                <span class="opacity-60">/00</span> <?= $block->escapeHtml($block->getSetting('general/business/name', 'Eco Life')) ?> · Rooftop Solar
+            </p>
+
+            <h1 class="mt-4 text-pearl text-[clamp(2.2rem,4.4vw,3.5rem)] leading-[1.08]" data-word-reveal>
+                Clean power, <em class="italic text-gold-300">rooted in nature.</em>
+            </h1>
+
+            <div class="gold-rule"></div>
+
+            <p class="max-w-lg text-[1.02rem] leading-relaxed text-pine-100/90">
+                Free site survey, a design built around your roof, and installation by a
+                local team across Satara district — talk to a real solar advisor, not a
+                call centre.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-2.5">
+                <span class="badge">☀ Free site survey</span>
+                <span class="badge">🏘 Homes &amp; societies</span>
+                <span class="badge">📍 Satara &amp; district</span>
+            </div>
+
+            <div class="mt-9 flex flex-wrap items-center gap-4">
+                <a href="#enquiry" class="btn-gold btn-wide" data-magnetic="0.22">Book a free site visit</a>
+                <a href="/calculator" class="btn-outline">See what you could save</a>
+                <?php if ($whatsapp !== ''): ?>
+                    <a href="<?= $block->escapeUrl($whatsapp) ?>" rel="noopener" target="_blank"
+                       class="font-mono text-[.78rem] text-gold-300 underline-offset-4 hover:underline">
+                        or message us on WhatsApp
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div id="enquiry" class="flex items-center justify-center bg-pearl-dim px-5 py-14 sm:px-8">
+        <div class="reveal reveal-right w-full max-w-lg">
+            <?= $block->renderChild(\EcoLife\Lead\Block\Form::class,
+                                    'EcoLife_Lead::form/lead.phtml',
+                                    ['source' => 'home']) ?>
+        </div>
+    </div>
+</section>
+
+<?php /* ======================================================= solutions */ ?>
+<section id="solutions" class="section-shell py-20 lg:py-24">
+    <div class="reveal">
+        <p class="eyebrow"><span class="opacity-60">/01</span> What we install</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl">Rooftop solar, done right</h2>
+    </div>
+
+    <?php /* The one thing the business is best known for gets the full width. */ ?>
+    <article class="reveal card-lift mt-10 grid overflow-hidden rounded-2xl bg-pine-800 shadow-eco md:grid-cols-2">
+        <button type="button"
+                class="group relative flex min-h-[280px] cursor-zoom-in items-center justify-center overflow-hidden bg-pine-950"
+                data-lightbox
+                data-lightbox-src="<?= $block->escapeUrl($block->getStaticUrl('images/panels.jpg')) ?>"
+                data-lightbox-caption="Rooftop solar array — Satara, Maharashtra">
+            <span class="sr-only">View larger photograph</span>
+            <img src="<?= $block->escapeUrl($block->getStaticUrl('images/panels.jpg')) ?>"
+                 alt="Rooftop solar panel installation"
+                 class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+            <span class="pointer-events-none absolute right-4 top-4 flex h-9 w-9 items-center justify-center
+                         rounded-full bg-pine-950/70 text-pearl opacity-0 transition group-hover:opacity-100">⤢</span>
+        </button>
+
+        <div class="flex flex-col justify-center p-8 sm:p-10">
+            <p class="font-mono text-[.68rem] uppercase tracking-[.08em] text-gold-300">
+                Available now · On-grid / Off-grid
+            </p>
+            <h3 class="mt-3 text-2xl text-pearl"><?= $block->escapeHtml($featured['title']) ?></h3>
+            <p class="mt-3 max-w-md text-[.95rem] leading-relaxed text-pine-100/85">
+                <?= $block->escapeHtml($featured['summary']) ?>
+            </p>
+
+            <ul class="mt-5 space-y-2">
+                <?php foreach ($featured['points'] as $point): ?>
+                    <li class="flex gap-2.5 text-[.88rem] text-pine-100/85">
+                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" aria-hidden="true"></span>
+                        <span><?= $block->escapeHtml($point) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <div class="mt-7">
+                <a href="#enquiry" class="btn-gold" data-magnetic="0.2">Get a free site survey →</a>
+            </div>
+        </div>
+    </article>
+
+    <p class="mt-14 flex items-center gap-4 text-[.95rem] text-muted">
+        <span class="shrink-0">And everything that goes with it</span>
+        <span class="h-px flex-1 bg-sand" aria-hidden="true"></span>
+    </p>
+
+    <div class="mt-6 grid gap-6 md:grid-cols-3" data-reveal-stagger="110">
+        <?php foreach ($services as $service): ?>
+            <div class="reveal card card-lift">
+                <span class="inline-flex text-pine-500">
+                    <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class,
+                                            'EcoLife_Cms::page/service-icon.phtml',
+                                            ['icon' => $service['icon']]) ?>
+                </span>
+                <h3 class="mt-4 text-[1.05rem]"><?= $block->escapeHtml($service['title']) ?></h3>
+                <p class="mt-2 text-[.87rem] leading-relaxed text-muted"><?= $block->escapeHtml($service['summary']) ?></p>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="mt-8">
+        <a href="/services" class="font-mono text-[.8rem] text-pine-500 underline-offset-4 hover:underline">
+            More about what we install →
+        </a>
+    </div>
+</section>
+
+<?php /* ============================================================ trust */ ?>
+<section class="border-y border-sand bg-pearl-dim">
+    <div class="section-shell py-20">
+        <div class="reveal">
+            <p class="eyebrow"><span class="opacity-60">/02</span> Why Eco Life</p>
+            <h2 class="mt-3 text-3xl sm:text-4xl">Built for Maharashtra roofs and Maharashtra weather</h2>
+        </div>
+
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger="90">
+            <?php foreach ($block->getDifferentiators() as $index => $item): ?>
+                <div class="reveal card card-lift border-t-2 border-t-gold-500">
+                    <span class="text-xl" aria-hidden="true"><?= $block->escapeHtml(['🌿', '☀', '🏘', '🛠'][$index] ?? '🌿') ?></span>
+                    <h3 class="mt-3 text-[1.02rem]"><?= $block->escapeHtml($item['title']) ?></h3>
+                    <p class="mt-2 text-[.87rem] leading-relaxed text-muted"><?= $block->escapeHtml($item['text']) ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<?php /* ========================================================== process */ ?>
+<section class="section-shell py-20 lg:py-24">
+    <div class="reveal">
+        <p class="eyebrow"><span class="opacity-60">/03</span> How it works</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl">Four steps from roof to running</h2>
+    </div>
+
+    <ol class="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4" data-reveal-stagger="120">
+        <?php foreach ($block->getProcess() as $index => $stage): ?>
+            <?php /* step-rule draws the dashed connector to the next step. It
+                     hides itself below the four-column breakpoint. */ ?>
+            <li class="reveal relative <?= $block->escapeHtmlAttr($index < 3 ? 'step-rule' : '') ?>">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full border border-gold-500
+                             font-mono text-[.75rem] text-gold-600">
+                    <?= $block->escapeHtml($stage['step']) ?>
+                </span>
+                <h3 class="mt-4 text-[1.05rem]"><?= $block->escapeHtml($stage['title']) ?></h3>
+                <p class="mt-2 text-[.87rem] leading-relaxed text-muted"><?= $block->escapeHtml($stage['text']) ?></p>
+            </li>
+        <?php endforeach; ?>
+    </ol>
+</section>
+
+<?php /* ===================================================== streetlight */ ?>
+<section class="overflow-hidden bg-gradient-to-b from-pine-900 to-pine-800 text-center">
+    <div class="section-shell py-20 lg:py-24">
+        <p class="eyebrow reveal justify-center text-gold-300"><span class="opacity-60">/04</span> The same sun, everywhere</p>
+        <h2 class="reveal mx-auto mt-3 max-w-[26ch] text-3xl text-pearl sm:text-4xl">
+            From rooftops to streetlights — solar keeps working after dark
+        </h2>
+        <p class="reveal mx-auto mt-4 max-w-[52ch] text-[.95rem] leading-relaxed text-pine-100/85">
+            The sun your panels capture by day is the same light that keeps a street lit
+            by night. Scroll to here and watch it switch on.
+        </p>
+
+        <?php /* Scroll-triggered: app.js toggles .is-lit, the transitions live in input.css. */ ?>
+        <div class="scene reveal reveal-zoom mx-auto mt-12 max-w-[300px] rounded-3xl bg-pearl px-8 pb-7 pt-10 shadow-eco-lg"
+             data-scene>
+            <svg viewBox="0 0 200 230" class="w-full overflow-visible" fill="none" role="img"
+                 aria-label="A solar streetlight switching on above sprouting leaves">
+                <defs>
+                    <radialGradient id="lampGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FFCE54" stop-opacity="0.9"/>
+                        <stop offset="100%" stop-color="#FFCE54" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="lampBeam" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#FFCE54" stop-opacity="0.42"/>
+                        <stop offset="100%" stop-color="#FFCE54" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+
+                <ellipse cx="100" cy="205" rx="16" ry="4.5" fill="#E6D9C3"/>
+                <path d="M100 205 L100 92 C100 72 103 60 122 53" stroke="#B8935A" stroke-width="11"
+                      stroke-linecap="round" fill="none"/>
+
+                <?php /* The cone of light is new: the lamp now reaches the ground. */ ?>
+                <path class="lamp-beam" d="M132 74 L186 200 L78 200 Z" fill="url(#lampBeam)"/>
+                <circle class="lamp-glow" cx="132" cy="66" r="42" fill="url(#lampGlow)"/>
+                <circle class="lamp-bulb" cx="132" cy="66" r="15" fill="#9AA394"/>
+
+                <rect x="112" y="34" width="46" height="24" rx="5" fill="#173A1E" stroke="#E95204"
+                      stroke-width="1.5" transform="rotate(-14 135 46)"/>
+
+                <path d="M40 216c14-8 22-2 30 2 8 4 18-6 30-2 12 4 20 0 30 3" stroke="#3C8A16"
+                      stroke-width="3.2" stroke-linecap="round" fill="none"/>
+                <path d="M52 214c-6-4-6-9-1-13" stroke="#3C8A16" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+
+                <path class="leaf-sprout" d="M74 204c-14-4-20 6-16 18 14 2 22-8 16-18Z" fill="#8BC34A"/>
+                <path class="leaf-sprout" d="M126 204c14-4 20 6 16 18-14 2-22-8-16-18Z" fill="#2E7D32"/>
+                <path class="leaf-sprout" d="M92 210c-10 2-13 10-8 18 10-2 15-10 8-18Z" fill="#8BC34A"/>
+                <path class="leaf-sprout" d="M108 210c10 2 13 10 8 18-10-2-15-10-8-18Z" fill="#2E7D32"/>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<?php /* ============================================================= CTA */ ?>
+<section class="border-y border-gold-300/30 bg-gradient-to-br from-pine-500 to-pine-900 text-center">
+    <div class="section-shell py-20">
+        <p class="eyebrow reveal justify-center text-gold-300">Ready when you are</p>
+        <h2 class="reveal mx-auto mt-3 max-w-[20ch] text-3xl text-pearl sm:text-4xl">
+            Get your free rooftop quote
+        </h2>
+        <p class="reveal mx-auto mt-4 max-w-[46ch] text-[.95rem] text-pine-100/90">
+            No obligation. A short call and a site visit is all it takes to turn an
+            estimate into a real number.
+        </p>
+        <div class="reveal mt-8 flex flex-wrap justify-center gap-4">
+            <a href="#enquiry" class="btn-gold btn-wide" data-magnetic="0.22">Get free quote →</a>
+            <a href="/calculator" class="btn-outline">Back to the calculator</a>
+        </div>
+    </div>
+</section>

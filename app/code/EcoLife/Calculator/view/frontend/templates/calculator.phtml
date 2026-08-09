@@ -1,0 +1,120 @@
+<?php
+/**
+ * Savings calculator.
+ *
+ * Server-rendered with a starting estimate, then updated over fetch() as the
+ * visitor changes the inputs. It works without JavaScript because the form
+ * still posts to the same endpoint and the page comes back with the figures
+ * filled in.
+ *
+ * The dark panel and the bill slider are the original site's design; the
+ * arithmetic is the same set of factors, moved server-side into
+ * EcoLife_Calculator/etc/calculator.php where it can be corrected without
+ * editing a script.
+ *
+ * @var \EcoLife\Calculator\Block\Calculator $block
+ */
+$initial = $block->getInitialEstimate();
+?>
+<section class="border-b border-sand bg-pearl-dim">
+    <div class="section-shell max-w-3xl py-16 lg:py-20">
+        <p class="eyebrow reveal"><span class="opacity-60">/05</span> Estimate</p>
+        <h1 class="reveal mt-3 text-4xl sm:text-5xl">See what solar could save you</h1>
+        <p class="reveal mt-5 text-[1.02rem] leading-relaxed text-muted">
+            Move the numbers to match your situation. This is a starting point, not a quote —
+            the real figure comes after we have seen your roof.
+        </p>
+    </div>
+</section>
+
+<section class="bg-pine-900">
+    <div class="section-shell py-16 lg:py-20">
+        <div class="reveal grid overflow-hidden rounded-2xl border border-gold-300/35 shadow-eco-lg lg:grid-cols-2">
+
+            <?php /* ------------------------------------------------- inputs */ ?>
+            <form class="bg-white/[0.04] p-8 sm:p-10" data-calculator
+                  method="get" action="<?= $block->escapeUrl($block->getEstimateUrl()) ?>">
+
+                <label class="form-label text-pine-100/70" for="calc-bill">Monthly electricity bill</label>
+                <input class="w-full accent-gold-500" id="calc-bill" name="monthly_bill" type="range"
+                       min="500" max="15000" step="100" value="3000" data-calc-bill>
+                <div class="mt-2 flex items-center justify-between font-mono text-[.72rem] text-pine-100/60">
+                    <span>₹500</span>
+                    <span class="text-[1rem] text-gold-300" data-calc-bill-label>₹3,000</span>
+                    <span>₹15,000+</span>
+                </div>
+
+                <label class="form-label mt-7 text-pine-100/70" for="calc-roof">Roof type</label>
+                <select class="form-input-dark" id="calc-roof" name="roof_type" data-calc-roof>
+                    <?php foreach ($block->getRoofTypes() as $value => $label): ?>
+                        <option value="<?= $block->escapeHtmlAttr($value) ?>"><?= $block->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <label class="form-label mt-5 text-pine-100/70" for="calc-system">What are you exploring?</label>
+                <select class="form-input-dark" id="calc-system" name="system_type" data-calc-system>
+                    <?php foreach ($block->getSystemTypes() as $value => $label): ?>
+                        <option value="<?= $block->escapeHtmlAttr($value) ?>"><?= $block->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <button type="submit" class="btn-gold mt-8 w-full">Update estimate</button>
+
+                <p class="mt-4 text-center font-mono text-[.68rem] text-pine-100/45">
+                    Updates as you move the slider
+                </p>
+            </form>
+
+            <?php /* ------------------------------------------------ results */ ?>
+            <div class="flex flex-col justify-center bg-black/20 p-8 sm:p-10">
+                <p class="form-label text-pine-100/70">Estimated monthly saving</p>
+
+                <?php /* Counts up once when it scrolls into view, then tracks the
+                         slider. data-count-to needs the raw number, so the
+                         formatted string is only the fallback text. */ ?>
+                <p class="font-display text-[2.7rem] font-semibold leading-none text-gold-300"
+                   data-calc-monthly
+                   data-count-to="<?= $block->escapeHtmlAttr((string) $initial['monthly_saving']) ?>"
+                   data-count-prefix="₹">
+                    <?= $block->escapeHtml($block->formatCurrency($initial['monthly_saving'])) ?>
+                </p>
+
+                <dl class="mt-7 space-y-0">
+                    <div class="flex items-center justify-between border-t border-gold-300/25 py-3.5">
+                        <dt class="text-[.88rem] text-pine-100/85">Estimated annual saving</dt>
+                        <dd class="font-mono text-[.9rem] font-bold text-pearl" data-calc-annual>
+                            <?= $block->escapeHtml($block->formatCurrency($initial['annual_saving'])) ?>
+                        </dd>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-gold-300/25 py-3.5">
+                        <dt class="text-[.88rem] text-pine-100/85">Suggested system size</dt>
+                        <dd class="font-mono text-[.9rem] font-bold text-pearl" data-calc-size>
+                            <?= $block->escapeHtml((string) $initial['system_size_kw']) ?> kW
+                        </dd>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-gold-300/25 py-3.5">
+                        <dt class="text-[.88rem] text-pine-100/85">Rough break-even</dt>
+                        <dd class="font-mono text-[.9rem] font-bold text-pearl" data-calc-payback>
+                            <?= $block->escapeHtml((string) $initial['payback_years']) ?> years
+                        </dd>
+                    </div>
+                    <div class="flex items-center justify-between border-t border-gold-300/25 py-3.5">
+                        <dt class="text-[.88rem] text-pine-100/85">Indicative system cost</dt>
+                        <dd class="font-mono text-[.9rem] font-bold text-pearl" data-calc-cost>
+                            <?= $block->escapeHtml($block->formatCurrency($initial['system_cost'])) ?>
+                        </dd>
+                    </div>
+                </dl>
+
+                <p class="mt-6 text-[.72rem] leading-relaxed text-pine-100/60">
+                    <?= $block->escapeHtml($block->getDisclaimer()) ?>
+                </p>
+
+                <div class="mt-7 flex flex-wrap gap-3">
+                    <a href="/contact" class="btn-gold" data-magnetic="0.2">Get my exact quote →</a>
+                    <a href="/services" class="btn-outline">What we install</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

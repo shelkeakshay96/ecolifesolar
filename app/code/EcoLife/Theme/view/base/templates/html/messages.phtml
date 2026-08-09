@@ -1,0 +1,26 @@
+<?php
+/**
+ * Flash messages. Shared by both areas.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+$messages = (array) $block->getData('messages', []);
+if ($messages === []) {
+    return;
+}
+
+$classes = [
+    'success' => 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    'error'   => 'border-red-200 bg-red-50 text-red-800',
+    'warning' => 'border-amber-200 bg-amber-50 text-amber-800',
+    'notice'  => 'border-slate-200 bg-slate-50 text-slate-700',
+];
+?>
+<div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8" role="status" aria-live="polite">
+    <?php foreach ($messages as $message): ?>
+        <?php $type = (string) ($message['type'] ?? 'notice'); ?>
+        <div class="mb-3 rounded-lg border px-4 py-3 text-sm <?= $block->escapeHtmlAttr($classes[$type] ?? $classes['notice']) ?>">
+            <?= $block->escapeHtml($message['text'] ?? '') ?>
+        </div>
+    <?php endforeach; ?>
+</div>

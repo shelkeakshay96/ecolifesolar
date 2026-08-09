@@ -1,0 +1,101 @@
+# EcoLifeSolar :: webroot Apache configuration.
+#
+# This file only has to do two jobs, because the directory layout already did
+# the hard one: app/, var/, lib/, bin/ and tools/ sit OUTSIDE this directory,
+# so no deny rule here is load-bearing for them. They are unreachable by URL
+# because they are not under the document root.
+#
+#   1. Send every URL that is not a real file to index.php, which is the only
+#      file in here PHP ever executes. Without this rule the router sees
+#      REQUEST_URI for "/" and nothing else -- every other page 404s at Apache
+#      before PHP is reached.
+#   2. Stop pub/media/ -- the one directory a stranger can write to -- from
+#      ever executing what it is given. See pub/media/.htaccess for that.
+
+# ---------------------------------------------------------------- front controller
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # RewriteBase is deliberately not set. The application builds every URL
+    # from "/" (see Core/App/Url.php), so it must be served from a domain
+    # root, not a subdirectory.
+
+    # Force HTTPS. The certificate must exist before this is switched on --
+    # comment this block out until it does, or the site becomes unreachable.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Real files and directories are served directly: CSS, JS, fonts, and
+    # everything under media/.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Everything else is a route.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Fail loudly rather than serving a site where only the home page works.
+    <IfModule mod_headers.c>
+        Header set X-EcoLife-Warning "mod_rewrite unavailable -- routing is broken"
+    </IfModule>
+</IfModule>
+
+# ---------------------------------------------------------------- hardening
+
+# No directory listings anywhere in the webroot.
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Dotfiles are never content. This is belt-and-braces: there are none in here.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Only meaningful once HTTPS is confirmed working. Two years, because
+    # anything shorter is not accepted for preload -- and because backing this
+    # out is painful, leave it commented until the certificate is proven.
+    # Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains"
+</IfModule>
+
+# The PHP version is not a secret worth keeping, but it is free to withhold.
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+</IfModule>
+ServerSignature Off
+
+# ---------------------------------------------------------------- static assets
+
+# Fonts and images are content-addressed by mtime (Url::getStaticUrl appends
+# ?v=<mtime>), so a long max-age is safe: a rebuilt file gets a new URL.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType image/jpeg                "access plus 1 month"
+    ExpiresByType image/png                 "access plus 1 month"
+    ExpiresByType image/webp                "access plus 1 month"
+    ExpiresByType image/svg+xml             "access plus 1 month"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+    # woff2 is already compressed; deflating it again costs CPU and saves
+    # nothing.
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType font/woff2 .woff2
+</IfModule>

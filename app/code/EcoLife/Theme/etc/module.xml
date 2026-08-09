@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!--
+    EcoLife_Theme holds every layout and template in the application, plus the
+    Tailwind input.css. It contains zero PHP classes on purpose: separating it
+    from Core is what enforces "Core is framework, and is never edited to change
+    how the site looks."
+
+    It is a presentation module, not a Magento theme. There is no fallback
+    chain, no app/design and no theme inheritance, and none should be added.
+-->
+<module name="EcoLife_Theme" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+    </sequence>
+</module>

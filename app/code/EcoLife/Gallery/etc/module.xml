@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module name="EcoLife_Gallery" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+        <module name="EcoLife_Theme"/>
+        <module name="EcoLife_Backend"/>
+    </sequence>
+</module>

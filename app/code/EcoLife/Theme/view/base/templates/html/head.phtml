@@ -1,0 +1,21 @@
+<?php
+/**
+ * Document head. Shared by both areas -- lives in base/ rather than frontend/,
+ * so the admin panel gets the same stylesheet and metadata handling for free.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+?>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?= $block->escapeHtml($block->getData('title', 'EcoLifeSolar')) ?></title>
+
+<?php if ($description = (string) $block->getData('meta_description', '')): ?>
+<meta name="description" content="<?= $block->escapeHtmlAttr($description) ?>">
+<?php endif; ?>
+
+<meta name="robots" content="<?= $block->escapeHtmlAttr($block->getData('robots', 'index,follow')) ?>">
+<meta name="theme-color" content="#f59e0b">
+
+<link rel="stylesheet" href="<?= $block->escapeUrl($block->getStaticUrl('css/ecolife.css')) ?>">
+<link rel="icon" href="<?= $block->escapeUrl($block->getStaticUrl('images/favicon.svg')) ?>" type="image/svg+xml">

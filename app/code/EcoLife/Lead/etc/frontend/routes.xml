@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<routes>
+    <route id="lead" frontName="lead">
+        <module name="EcoLife_Lead"/>
+    </route>
+</routes>

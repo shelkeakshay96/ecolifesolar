@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+    /admin/auth/login   frontName auth, controller login,  action index
+    /admin/auth/logout  frontName auth, controller logout, action index
+
+    /admin and /admin/settings are single-segment URLs the standard scheme
+    cannot express; Backend\App\Router\Admin maps those two explicitly.
+-->
+<routes>
+    <route id="auth" frontName="auth">
+        <module name="EcoLife_Backend"/>
+    </route>
+</routes>

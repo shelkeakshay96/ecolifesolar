@@ -1,0 +1,120 @@
+<?php
+/**
+ * Gallery management.
+ *
+ * @var \EcoLife\Gallery\Block\Adminhtml\Manage $block
+ */
+$items = $block->getItems();
+?>
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Gallery</h1>
+    <p class="mt-1 text-sm text-slate-500">
+        Photos shown on the public gallery page. Lower sort order appears first.
+    </p>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+          enctype="multipart/form-data" class="card mt-6">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+        <h2 class="text-base font-semibold text-slate-900">Add a photo</h2>
+
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+                <label class="form-label" for="g-title">Title</label>
+                <input class="form-input" id="g-title" name="title" type="text" maxlength="190" required
+                       placeholder="e.g. 3 kW rooftop, Satara">
+            </div>
+            <div>
+                <label class="form-label" for="g-image">Photo</label>
+                <input class="form-input" id="g-image" name="image" type="file"
+                       accept="image/jpeg,image/png,image/webp" required>
+                <p class="mt-1 text-xs text-slate-400">JPG, PNG or WebP, up to 8 MB.</p>
+            </div>
+            <div>
+                <label class="form-label" for="g-location">Location</label>
+                <input class="form-input" id="g-location" name="location" type="text" maxlength="100"
+                       placeholder="Satara, Maharashtra">
+            </div>
+            <div>
+                <label class="form-label" for="g-category">Category</label>
+                <select class="form-input" id="g-category" name="category">
+                    <?php foreach ($block->getCategories() as $value => $label): ?>
+                        <option value="<?= $block->escapeHtmlAttr($value) ?>"><?= $block->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="g-size">System size (kW)</label>
+                <input class="form-input" id="g-size" name="system_size_kw" type="number" step="0.01" min="0">
+            </div>
+            <div>
+                <label class="form-label" for="g-date">Installed on</label>
+                <input class="form-input" id="g-date" name="install_date" type="date">
+            </div>
+            <div>
+                <label class="form-label" for="g-sort">Sort order</label>
+                <input class="form-input" id="g-sort" name="sort_order" type="number" value="0">
+            </div>
+            <div class="flex items-end">
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="is_active" value="1" checked>
+                    <span>Show on the website</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <label class="form-label" for="g-description">Description</label>
+            <textarea class="form-input" id="g-description" name="description" rows="2" maxlength="1000"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary mt-5">Add photo</button>
+    </form>
+
+    <div class="card mt-8 p-0">
+        <h2 class="border-b border-slate-200 px-6 py-4 text-base font-semibold text-slate-900">
+            <?= $block->escapeHtml((string) count($items)) ?> item(s)
+        </h2>
+
+        <?php if ($items === []): ?>
+            <p class="px-6 py-10 text-center text-sm text-slate-500">Nothing in the gallery yet.</p>
+        <?php else: ?>
+            <ul class="divide-y divide-slate-100">
+                <?php foreach ($items as $item): ?>
+                    <li class="flex flex-wrap items-center gap-4 px-6 py-4">
+                        <?php if ($item->imageExists()): ?>
+                            <img src="<?= $block->escapeUrl($block->getMediaUrl((string) ($item->getData('thumbnail_path') ?: $item->getImagePath()))) ?>"
+                                 alt="" class="h-16 w-24 shrink-0 rounded object-cover" loading="lazy">
+                        <?php else: ?>
+                            <div class="flex h-16 w-24 shrink-0 items-center justify-center rounded bg-slate-100 text-[10px] text-slate-400">
+                                missing
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="font-medium text-slate-900"><?= $block->escapeHtml($item->getTitle()) ?></p>
+                            <p class="text-sm text-slate-500">
+                                <?php $meta = array_filter([$item->getSizeLabel(), $item->getLocation(), $item->getCategoryLabel()]); ?>
+                                <?= $block->escapeHtml(implode(' · ', $meta)) ?>
+                            </p>
+                        </div>
+
+                        <span class="rounded-full px-2 py-0.5 text-xs font-medium <?= $block->escapeHtmlAttr($item->isActive()
+                            ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500') ?>">
+                            <?= $block->escapeHtml($item->isActive() ? 'Visible' : 'Hidden') ?>
+                        </span>
+
+                        <span class="text-xs text-slate-400">order <?= $block->escapeHtml((string) $item->getData('sort_order')) ?></span>
+
+                        <form method="post" action="<?= $block->escapeUrl($block->getDeleteUrl($item)) ?>"
+                              onsubmit="return confirm('Remove this photo from the gallery?');">
+                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                            <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-500">Remove</button>
+                        </form>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+</div>

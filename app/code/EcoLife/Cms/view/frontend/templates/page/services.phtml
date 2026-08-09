@@ -1,0 +1,63 @@
+<?php
+/**
+ * Services page. Renders the same array the home page summarises, so the two
+ * cannot drift apart.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+?>
+<section class="border-b border-sand bg-pearl-dim">
+    <div class="section-shell max-w-3xl py-16 lg:py-20">
+        <p class="eyebrow reveal"><span class="opacity-60">/01</span> What we install</p>
+        <h1 class="reveal mt-3 text-4xl sm:text-5xl">Rooftop solar, done right</h1>
+        <p class="reveal mt-5 text-[1.02rem] leading-relaxed text-muted">
+            Four services, all carried out by our own team. Everything is sized around your
+            consumption and your roof rather than sold from a catalogue.
+        </p>
+    </div>
+</section>
+
+<section class="bg-pearl">
+    <div class="section-shell max-w-5xl py-16 lg:py-20">
+        <div class="space-y-7" data-reveal-stagger="110">
+            <?php foreach ($block->getServices() as $index => $service): ?>
+                <article class="reveal card card-lift">
+                    <div class="flex items-start gap-5">
+                        <span class="hidden shrink-0 text-pine-500 sm:inline-flex">
+                            <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class,
+                                                    'EcoLife_Cms::page/service-icon.phtml',
+                                                    ['icon' => $service['icon'], 'class' => 'h-16 w-16']) ?>
+                        </span>
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-start justify-between gap-4">
+                                <h2 class="text-xl sm:text-2xl"><?= $block->escapeHtml($service['title']) ?></h2>
+                                <span class="font-mono text-[.72rem] tracking-[.1em] text-sand-dark">
+                                    <?= $block->escapeHtml(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?>
+                                </span>
+                            </div>
+
+                            <p class="mt-3 text-[.95rem] leading-relaxed text-muted">
+                                <?= $block->escapeHtml($service['summary']) ?>
+                            </p>
+
+                            <ul class="mt-5 grid gap-2.5 sm:grid-cols-2">
+                                <?php foreach ($service['points'] as $point): ?>
+                                    <li class="flex gap-2.5 text-[.88rem]">
+                                        <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gold-500" aria-hidden="true"></span>
+                                        <span><?= $block->escapeHtml($point) ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="reveal mt-12 flex flex-wrap gap-4">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.2">Request a site visit</a>
+            <a href="/calculator" class="btn-secondary">Estimate your savings</a>
+        </div>
+    </div>
+</section>

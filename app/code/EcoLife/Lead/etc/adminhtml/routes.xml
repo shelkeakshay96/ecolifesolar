@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+    Plural front name, singular controller. /admin/leads/lead/view/id/5 works;
+    /admin/lead/view/id/5 cannot, because route/controller/action would read it
+    as frontName "lead", controller "view", action "id". This mirrors Magento's
+    admin/sales/order/view/order_id/5.
+-->
+<routes>
+    <route id="leads" frontName="leads">
+        <module name="EcoLife_Lead"/>
+    </route>
+</routes>

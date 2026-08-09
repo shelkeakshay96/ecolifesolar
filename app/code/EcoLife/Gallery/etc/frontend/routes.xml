@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<routes>
+    <route id="gallery" frontName="gallery">
+        <module name="EcoLife_Gallery"/>
+    </route>
+</routes>

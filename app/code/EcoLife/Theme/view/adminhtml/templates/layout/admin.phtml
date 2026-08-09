@@ -1,0 +1,41 @@
+<?php
+/**
+ * Admin panel layout.
+ *
+ * Deliberately plainer than the public site: this is a working tool for three
+ * people, and every pixel spent on decoration is a pixel not spent on the lead
+ * list. The navigation and the signed-in user strip arrive in step 7, once
+ * there is an authenticated session to read them from.
+ *
+ * @var \EcoLife\Core\View\Result\Layout $block
+ */
+?>
+<!doctype html>
+<html lang="en-IN" class="h-full">
+<head>
+    <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/head.phtml', [
+        'title'  => $block->getTitle(),
+        'robots' => 'noindex,nofollow',
+    ]) ?>
+</head>
+<body class="flex min-h-full flex-col bg-slate-100 text-slate-700 antialiased <?= $block->escapeHtmlAttr($block->getBodyClass()) ?>">
+
+    <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/admin-header.phtml') ?>
+
+    <main class="flex-1">
+        <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/messages.phtml', [
+            'messages' => $block->getMessages(),
+        ]) ?>
+
+        <?= $block->getContentHtml() ?>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-4">
+        <div class="mx-auto max-w-7xl px-4 text-xs text-slate-400 sm:px-6 lg:px-8">
+            EcoLifeSolar admin &middot; <?= $block->escapeHtml($block->getYear()) ?>
+        </div>
+    </footer>
+
+    <script src="<?= $block->escapeUrl($block->getStaticUrl('js/app.js')) ?>" defer></script>
+</body>
+</html>

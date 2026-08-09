@@ -1,0 +1,74 @@
+<?php
+/**
+ * Settings. Everything on the public site the family can change themselves.
+ *
+ * @var \EcoLife\Backend\Block\Adminhtml\Settings $block
+ */
+$groups       = $block->getGroupedSettings();
+$placeholders = $block->getPlaceholderCount();
+?>
+<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Settings</h1>
+    <p class="mt-1 text-sm text-slate-500">
+        These values appear on the public website. Changes take effect immediately.
+    </p>
+
+    <?php if ($placeholders > 0): ?>
+        <div class="mt-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <?= $block->escapeHtml((string) $placeholders) ?> value(s) below still contain the word
+            PLACEHOLDER and are visible to visitors. Please replace them.
+        </div>
+    <?php endif; ?>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" class="mt-6 space-y-6">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+        <?php foreach ($groups as $group => $settings): ?>
+            <div class="card">
+                <h2 class="text-base font-semibold text-slate-900"><?= $block->escapeHtml($group) ?></h2>
+
+                <div class="mt-4 space-y-4">
+                    <?php foreach ($settings as $path => $setting): ?>
+                        <?php $id = 'set-' . md5($path); ?>
+                        <div>
+                            <label class="form-label" for="<?= $block->escapeHtmlAttr($id) ?>">
+                                <?= $block->escapeHtml($setting['label']) ?>
+                                <?php if ($setting['placeholder']): ?>
+                                    <span class="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-amber-700">
+                                        placeholder
+                                    </span>
+                                <?php endif; ?>
+                            </label>
+
+                            <?php if ($setting['type'] === 'textarea'): ?>
+                                <textarea class="form-input" rows="2"
+                                          id="<?= $block->escapeHtmlAttr($id) ?>"
+                                          name="setting[<?= $block->escapeHtmlAttr($path) ?>]"><?= $block->escapeHtml($setting['value']) ?></textarea>
+                            <?php elseif ($setting['type'] === 'toggle'): ?>
+                                <label class="flex items-center gap-2 text-sm">
+                                    <input type="hidden" name="setting[<?= $block->escapeHtmlAttr($path) ?>]" value="0">
+                                    <input type="checkbox" id="<?= $block->escapeHtmlAttr($id) ?>"
+                                           name="setting[<?= $block->escapeHtmlAttr($path) ?>]" value="1"
+                                           <?= $block->escapeHtmlAttr($setting['value'] === '1' ? 'checked' : '') ?>>
+                                    <span>Yes</span>
+                                </label>
+                            <?php else: ?>
+                                <input class="form-input" type="text"
+                                       id="<?= $block->escapeHtmlAttr($id) ?>"
+                                       name="setting[<?= $block->escapeHtmlAttr($path) ?>]"
+                                       value="<?= $block->escapeHtmlAttr($setting['value']) ?>">
+                            <?php endif; ?>
+
+                            <?php if ($setting['help'] !== ''): ?>
+                                <p class="mt-1 text-xs text-slate-400"><?= $block->escapeHtml($setting['help']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+        <button type="submit" class="btn-primary">Save settings</button>
+    </form>
+</div>
