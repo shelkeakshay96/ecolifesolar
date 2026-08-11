@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EcoLife\Gallery\Model;
+namespace EcoLife\Core\Model;
 
 use EcoLife\Core\App\Logger;
 use RuntimeException;
@@ -22,12 +22,18 @@ use RuntimeException;
  *   4. The filename is randomised, so the uploader never chooses a path.
  *   5. It is written under pub/media/, which is served as static files and
  *      never passed to PHP.
+ *
+ * This lives in Core rather than in Gallery, where it started, because
+ * testimonials need it too. A Testimonial module depending on Gallery to accept
+ * a photograph would be a dependency describing nothing real, and the
+ * alternative -- a second copy -- would mean two copies of the path-confinement
+ * check in delete(). The subdirectory and the sizes are constructor arguments
+ * for the same reason: they were the only three things in here that were ever
+ * about galleries specifically.
  */
 final class ImageUploader
 {
-    private const MAX_BYTES  = 8 * 1024 * 1024;
-    private const MAX_WIDTH  = 1920;
-    private const THUMB_WIDTH = 480;
+    private const MAX_BYTES = 8 * 1024 * 1024;
 
     private const ALLOWED = [
         IMAGETYPE_JPEG => 'jpg',
@@ -36,8 +42,27 @@ final class ImageUploader
     ];
 
     /**
+     * @param string   $subdirectory   Under pub/media/. Also the prefix of every stored path.
+     * @param int      $maxWidth       The stored image is scaled down to this.
+     * @param int|null $thumbnailWidth A second, smaller copy, or null for none. Callers that
+     *                                 only ever render one size -- a testimonial avatar, say --
+     *                                 should pass null rather than write a file nothing reads.
+     */
+    public function __construct(
+        private readonly string $subdirectory = 'gallery',
+        private readonly int $maxWidth = 1920,
+        private readonly ?int $thumbnailWidth = 480,
+    ) {
+        // The subdirectory is ours, never a request value, but it is
+        // concatenated into a filesystem path and this is cheap.
+        if (!preg_match('/^[a-z][a-z0-9_-]*$/', $this->subdirectory)) {
+            throw new RuntimeException('Invalid media subdirectory.');
+        }
+    }
+
+    /**
      * @param array{name?: string, type?: string, tmp_name?: string, error?: int, size?: int} $file
-     * @return array{image_path: string, thumbnail_path: string}
+     * @return array{image_path: string, thumbnail_path: string|null}
      */
     public function upload(array $file): array
     {
@@ -62,7 +87,7 @@ final class ImageUploader
         $extension = self::ALLOWED[$info[2]];
         $image     = $this->decode($tmp, $info[2]);
 
-        $directory = BP . '/pub/media/gallery';
+        $directory = BP . '/pub/media/' . $this->subdirectory;
         if (!is_dir($directory) && !@mkdir($directory, 0775, true) && !is_dir($directory)) {
             throw new RuntimeException('Cannot write to the media directory.');
         }
@@ -74,20 +99,25 @@ final class ImageUploader
             throw new RuntimeException('Cannot write to the media directory.');
         }
 
-        $full  = $this->resize($image, self::MAX_WIDTH);
-        $thumb = $this->resize($image, self::THUMB_WIDTH);
-        imagedestroy($image);
-
-        $fullPath  = 'gallery/' . $basename . '.' . $extension;
-        $thumbPath = 'gallery/' . $basename . '-thumb.' . $extension;
+        $full     = $this->resize($image, $this->maxWidth);
+        $fullPath = $this->subdirectory . '/' . $basename . '.' . $extension;
 
         $this->write($full, $directory . '/' . $basename . '.' . $extension, $extension);
-        $this->write($thumb, $directory . '/' . $basename . '-thumb.' . $extension, $extension);
-
         imagedestroy($full);
-        imagedestroy($thumb);
 
-        Logger::info('Gallery image uploaded', ['path' => $fullPath]);
+        $thumbPath = null;
+
+        if ($this->thumbnailWidth !== null) {
+            $thumb     = $this->resize($image, $this->thumbnailWidth);
+            $thumbPath = $this->subdirectory . '/' . $basename . '-thumb.' . $extension;
+
+            $this->write($thumb, $directory . '/' . $basename . '-thumb.' . $extension, $extension);
+            imagedestroy($thumb);
+        }
+
+        imagedestroy($image);
+
+        Logger::info('Image uploaded', ['path' => $fullPath]);
 
         return ['image_path' => $fullPath, 'thumbnail_path' => $thumbPath];
     }

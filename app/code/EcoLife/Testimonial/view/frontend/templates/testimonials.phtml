@@ -37,16 +37,35 @@ if ($testimonials === []) {
                 </blockquote>
 
                 <figcaption class="mt-5 flex items-center gap-3 border-t border-sand pt-4">
-                    <?php /* A monogram, not a stock portrait. We do not have customer
-                             photographs and a stranger's face here would be a lie. */ ?>
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full
-                                 bg-pine-100 font-display text-[1.05rem] font-semibold text-pine-700">
-                        <?= $block->escapeHtml($testimonial->getInitial()) ?>
-                    </span>
+                    <?php if ($testimonial->photoExists()): ?>
+                        <img src="<?= $block->escapeUrl($block->getMediaUrl($testimonial->getPhotoPath())) ?>"
+                             alt="<?= $block->escapeHtmlAttr($testimonial->getCustomerName()) ?>"
+                             class="h-11 w-11 shrink-0 rounded-full border border-sand object-cover"
+                             loading="lazy" width="44" height="44">
+                    <?php else: ?>
+                        <?php /* Their initial, never a stock portrait. A stranger's face
+                                 above a real person's name is the one thing on this page
+                                 that would actually be a lie. */ ?>
+                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full
+                                     bg-pine-100 font-display text-[1.05rem] font-semibold text-pine-700">
+                            <?= $block->escapeHtml($testimonial->getInitial()) ?>
+                        </span>
+                    <?php endif; ?>
+
+                    <?php /* Three lines at most, and the byline drops whichever it has not
+                             got. Business gets its own line rather than joining the meta run
+                             because for a commercial job it is the credential -- "Santkrupa
+                             Dairy" is something a reader can go and check, in a way that
+                             "Karad" is not. */ ?>
                     <span class="min-w-0">
                         <span class="block text-[.9rem] font-semibold text-ink">
                             <?= $block->escapeHtml($testimonial->getCustomerName()) ?>
                         </span>
+                        <?php if ($testimonial->getBusiness() !== ''): ?>
+                            <span class="block truncate text-[.82rem] text-pine-600">
+                                <?= $block->escapeHtml($testimonial->getBusiness()) ?>
+                            </span>
+                        <?php endif; ?>
                         <?php if ($testimonial->getMetaLabel() !== ''): ?>
                             <span class="block font-mono text-[.7rem] uppercase tracking-[.08em] text-muted">
                                 <?= $block->escapeHtml($testimonial->getMetaLabel()) ?>

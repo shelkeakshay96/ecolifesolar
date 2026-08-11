@@ -7,7 +7,7 @@ namespace EcoLife\Gallery\Controller\Adminhtml\Item;
 use EcoLife\Backend\App\Action\AbstractAction;
 use EcoLife\Core\App\Logger;
 use EcoLife\Core\Controller\ResultInterface;
-use EcoLife\Gallery\Model\ImageUploader;
+use EcoLife\Core\Model\ImageUploader;
 use EcoLife\Gallery\Model\Item;
 use Throwable;
 

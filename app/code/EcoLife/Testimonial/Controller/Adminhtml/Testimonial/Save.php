@@ -7,7 +7,9 @@ namespace EcoLife\Testimonial\Controller\Adminhtml\Testimonial;
 use EcoLife\Backend\App\Action\AbstractAction;
 use EcoLife\Core\App\Logger;
 use EcoLife\Core\Controller\ResultInterface;
+use EcoLife\Core\Model\ImageUploader;
 use EcoLife\Testimonial\Model\Testimonial;
+use RuntimeException;
 use Throwable;
 
 /**
@@ -56,6 +58,7 @@ final class Save extends AbstractAction
         $testimonial->addData([
             'customer_name'  => mb_substr($name, 0, 120),
             'location'       => mb_substr(trim((string) $request->getPost('location', '')), 0, 100) ?: null,
+            'business'       => mb_substr(trim((string) $request->getPost('business', '')), 0, 150) ?: null,
             'quote'          => mb_substr($quote, 0, 65535),
             'system_size_kw' => is_numeric($request->getPost('system_size_kw'))
                                     ? round((float) $request->getPost('system_size_kw'), 2) : null,
@@ -64,12 +67,45 @@ final class Save extends AbstractAction
             'is_active'      => $request->getPost('is_active') ? 1 : 0,
         ]);
 
+        // A testimonial is worth publishing with or without a face, so unlike
+        // the gallery there is no "you must choose a photo" branch. Only an
+        // upload that was actually attempted and then failed is an error.
+        $upload = $request->getFiles('photo');
+        $hasNew = is_array($upload) && (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+
+        if ($hasNew) {
+            try {
+                // 640px and no thumbnail: this is only ever drawn as a small
+                // round avatar, so a second file would be one nothing reads.
+                $paths = (new ImageUploader('testimonial', 640, null))->upload($upload);
+            } catch (RuntimeException $e) {
+                $messages->error($e->getMessage());
+                return $this->resultRedirect()->setUrl($back);
+            } catch (Throwable $e) {
+                Logger::exception($e);
+                $messages->error('That photo could not be processed.');
+                return $this->resultRedirect()->setUrl($back);
+            }
+
+            $superseded = $testimonial->getPhotoPath();
+            $testimonial->setData('photo_path', $paths['image_path']);
+        } elseif ($request->getPost('remove_photo')) {
+            $superseded = $testimonial->getPhotoPath();
+            $testimonial->setData('photo_path', null);
+        }
+
         try {
             $testimonial->save();
         } catch (Throwable $e) {
             Logger::exception($e);
             $messages->error('Could not save that testimonial.');
             return $this->resultRedirect()->setUrl($back);
+        }
+
+        // Only once the row is safely saved is the old file removed. The other
+        // order loses the photograph if the save then fails.
+        if (isset($superseded) && $superseded !== '') {
+            (new ImageUploader('testimonial'))->delete($superseded);
         }
 
         Logger::info('Testimonial saved', [

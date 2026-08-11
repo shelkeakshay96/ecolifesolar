@@ -1,7 +1,15 @@
 <?php
 /**
  * Testimonial management: the list and the add form on one screen, mirroring
- * EcoLife_Gallery::manage.phtml.
+ * EcoLife_Gallery::manage.phtml -- with one thing the gallery screen lacks.
+ *
+ * Each row carries a full edit form inside a <details>. The gallery has no way
+ * to change a saved item, which is survivable for a photo you can delete and
+ * re-upload, but not for a quote: the realistic workflow is that a customer
+ * says something good, it goes in that afternoon, and their photograph turns up
+ * a week later. <details> rather than a script because it needs no JavaScript
+ * at all, which under script-src 'self' is one fewer thing that can silently
+ * fail to load.
  *
  * @var \EcoLife\Testimonial\Block\Adminhtml\Manage $block
  */
@@ -15,7 +23,8 @@ $testimonials = $block->getTestimonials();
         The section is hidden on the website until at least one quote is visible here.
     </p>
 
-    <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" class="card mt-6">
+    <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+          enctype="multipart/form-data" class="card mt-6">
         <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
 
         <h2 class="text-base font-semibold text-slate-900">Add a testimonial</h2>
@@ -27,14 +36,29 @@ $testimonials = $block->getTestimonials();
                        placeholder="e.g. Sunil Deshmukh">
             </div>
             <div>
+                <label class="form-label" for="t-business">Business or organisation</label>
+                <input class="form-input" id="t-business" name="business" type="text" maxlength="150"
+                       placeholder="e.g. Santkrupa Dairy">
+                <p class="mt-1 text-xs text-slate-400">Leave blank for a home customer.</p>
+            </div>
+            <div>
                 <label class="form-label" for="t-location">Town or area</label>
                 <input class="form-input" id="t-location" name="location" type="text" maxlength="100"
                        placeholder="e.g. Karad">
             </div>
             <div>
+                <label class="form-label" for="t-photo">Photo</label>
+                <input class="form-input" id="t-photo" name="photo" type="file"
+                       accept="image/jpeg,image/png,image/webp">
+                <p class="mt-1 text-xs text-slate-400">
+                    Optional. JPG, PNG or WebP up to 8 MB. Shown as a small round portrait, so a
+                    face fills the frame better than a full-length photo. Their initials are used
+                    if you have none.
+                </p>
+            </div>
+            <div>
                 <label class="form-label" for="t-size">System size (kW)</label>
                 <input class="form-input" id="t-size" name="system_size_kw" type="number" step="0.01" min="0">
-                <p class="mt-1 text-xs text-slate-400">Optional. Shown beside the town.</p>
             </div>
             <div>
                 <label class="form-label" for="t-language">Language</label>
@@ -78,32 +102,127 @@ $testimonials = $block->getTestimonials();
         <?php else: ?>
             <ul class="divide-y divide-slate-100">
                 <?php foreach ($testimonials as $testimonial): ?>
-                    <li class="flex flex-wrap items-start gap-4 px-6 py-4">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full
-                                     bg-slate-100 text-sm font-semibold text-slate-600">
-                            <?= $block->escapeHtml($testimonial->getInitial()) ?>
-                        </span>
+                    <?php $id = (int) $testimonial->getId(); ?>
+                    <li class="px-6 py-4">
+                        <div class="flex flex-wrap items-start gap-4">
+                            <?php if ($testimonial->photoExists()): ?>
+                                <img src="<?= $block->escapeUrl($block->getMediaUrl($testimonial->getPhotoPath())) ?>"
+                                     alt="" class="h-12 w-12 shrink-0 rounded-full object-cover" loading="lazy">
+                            <?php else: ?>
+                                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full
+                                             bg-slate-100 text-sm font-semibold text-slate-600">
+                                    <?= $block->escapeHtml($testimonial->getInitial()) ?>
+                                </span>
+                            <?php endif; ?>
 
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm text-slate-700">&ldquo;<?= $block->escapeHtml($testimonial->getQuote()) ?>&rdquo;</p>
-                            <p class="mt-1 text-sm font-medium text-slate-900"><?= $block->escapeHtml($testimonial->getCustomerName()) ?></p>
-                            <p class="text-sm text-slate-500"><?= $block->escapeHtml($testimonial->getMetaLabel()) ?></p>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm text-slate-700">&ldquo;<?= $block->escapeHtml($testimonial->getQuote()) ?>&rdquo;</p>
+                                <p class="mt-1 text-sm font-medium text-slate-900"><?= $block->escapeHtml($testimonial->getCustomerName()) ?></p>
+                                <?php if ($testimonial->getBusiness() !== ''): ?>
+                                    <p class="text-sm text-slate-600"><?= $block->escapeHtml($testimonial->getBusiness()) ?></p>
+                                <?php endif; ?>
+                                <p class="text-sm text-slate-500"><?= $block->escapeHtml($testimonial->getMetaLabel()) ?></p>
+                            </div>
+
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium <?= $block->escapeHtmlAttr($testimonial->isActive()
+                                ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500') ?>">
+                                <?= $block->escapeHtml($testimonial->isActive() ? 'Visible' : 'Hidden') ?>
+                            </span>
+
+                            <span class="text-xs text-slate-400">order <?= $block->escapeHtml((string) $testimonial->getData('sort_order')) ?></span>
+
+                            <?php /* data-confirm rather than onsubmit: an inline handler is script,
+                                     and script-src 'self' drops it silently. app.js binds this. */ ?>
+                            <form method="post" action="<?= $block->escapeUrl($block->getDeleteUrl($testimonial)) ?>"
+                                  data-confirm="Remove this testimonial?">
+                                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                                <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-500">Remove</button>
+                            </form>
                         </div>
 
-                        <span class="rounded-full px-2 py-0.5 text-xs font-medium <?= $block->escapeHtmlAttr($testimonial->isActive()
-                            ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500') ?>">
-                            <?= $block->escapeHtml($testimonial->isActive() ? 'Visible' : 'Hidden') ?>
-                        </span>
+                        <details class="mt-3">
+                            <summary class="cursor-pointer text-sm font-medium text-slate-500 hover:text-slate-800">
+                                Edit / add photo
+                            </summary>
 
-                        <span class="text-xs text-slate-400">order <?= $block->escapeHtml((string) $testimonial->getData('sort_order')) ?></span>
+                            <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+                                  enctype="multipart/form-data" class="mt-3 rounded-lg bg-slate-50 p-4">
+                                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                                <input type="hidden" name="testimonial_id" value="<?= $block->escapeHtmlAttr((string) $id) ?>">
 
-                        <?php /* data-confirm rather than onsubmit: an inline handler is script,
-                                 and script-src 'self' drops it silently. app.js binds this. */ ?>
-                        <form method="post" action="<?= $block->escapeUrl($block->getDeleteUrl($testimonial)) ?>"
-                              data-confirm="Remove this testimonial?">
-                            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
-                            <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-500">Remove</button>
-                        </form>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="form-label" for="e-name-<?= $block->escapeHtmlAttr((string) $id) ?>">Customer name</label>
+                                        <input class="form-input" id="e-name-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="customer_name" type="text" maxlength="120" required
+                                               value="<?= $block->escapeHtmlAttr($testimonial->getCustomerName()) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-business-<?= $block->escapeHtmlAttr((string) $id) ?>">Business or organisation</label>
+                                        <input class="form-input" id="e-business-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="business" type="text" maxlength="150"
+                                               value="<?= $block->escapeHtmlAttr($testimonial->getBusiness()) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-location-<?= $block->escapeHtmlAttr((string) $id) ?>">Town or area</label>
+                                        <input class="form-input" id="e-location-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="location" type="text" maxlength="100"
+                                               value="<?= $block->escapeHtmlAttr($testimonial->getLocation()) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-photo-<?= $block->escapeHtmlAttr((string) $id) ?>">
+                                            <?= $block->escapeHtml($testimonial->photoExists() ? 'Replace photo' : 'Add photo') ?>
+                                        </label>
+                                        <input class="form-input" id="e-photo-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+                                        <?php if ($testimonial->photoExists()): ?>
+                                            <label class="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                                                <input type="checkbox" name="remove_photo" value="1">
+                                                <span>Remove the current photo instead</span>
+                                            </label>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-size-<?= $block->escapeHtmlAttr((string) $id) ?>">System size (kW)</label>
+                                        <input class="form-input" id="e-size-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="system_size_kw" type="number" step="0.01" min="0"
+                                               value="<?= $block->escapeHtmlAttr((string) $testimonial->getData('system_size_kw')) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-language-<?= $block->escapeHtmlAttr((string) $id) ?>">Language</label>
+                                        <select class="form-input" id="e-language-<?= $block->escapeHtmlAttr((string) $id) ?>" name="language">
+                                            <?php foreach ($block->getLanguages() as $value => $label): ?>
+                                                <option value="<?= $block->escapeHtmlAttr($value) ?>"
+                                                    <?= $block->escapeHtmlAttr($testimonial->getLanguage() === $value ? 'selected' : '') ?>>
+                                                    <?= $block->escapeHtml($label) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-sort-<?= $block->escapeHtmlAttr((string) $id) ?>">Sort order</label>
+                                        <input class="form-input" id="e-sort-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                               name="sort_order" type="number"
+                                               value="<?= $block->escapeHtmlAttr((string) $testimonial->getData('sort_order')) ?>">
+                                    </div>
+                                    <div class="flex items-end">
+                                        <label class="flex items-center gap-2 text-sm">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                <?= $block->escapeHtmlAttr($testimonial->isActive() ? 'checked' : '') ?>>
+                                            <span>Show on the website</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="form-label" for="e-quote-<?= $block->escapeHtmlAttr((string) $id) ?>">What they said</label>
+                                    <textarea class="form-input" id="e-quote-<?= $block->escapeHtmlAttr((string) $id) ?>"
+                                              name="quote" rows="3" maxlength="1000" required><?= $block->escapeHtml($testimonial->getQuote()) ?></textarea>
+                                </div>
+
+                                <button type="submit" class="btn-primary mt-4">Save changes</button>
+                            </form>
+                        </details>
                     </li>
                 <?php endforeach; ?>
             </ul>

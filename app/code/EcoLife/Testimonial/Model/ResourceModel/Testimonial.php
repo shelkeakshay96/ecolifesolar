@@ -17,7 +17,8 @@ final class Testimonial extends AbstractResource
      * writes them -- addOrder('created_at') throws otherwise.
      */
     protected array $fields = [
-        'testimonial_id', 'customer_name', 'location', 'quote', 'system_size_kw',
-        'language', 'sort_order', 'is_active', 'created_at', 'updated_at',
+        'testimonial_id', 'customer_name', 'location', 'business', 'photo_path',
+        'quote', 'system_size_kw', 'language', 'sort_order', 'is_active',
+        'created_at', 'updated_at',
     ];
 }

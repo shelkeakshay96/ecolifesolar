@@ -7,6 +7,7 @@ namespace EcoLife\Testimonial\Controller\Adminhtml\Testimonial;
 use EcoLife\Backend\App\Action\AbstractAction;
 use EcoLife\Core\App\Logger;
 use EcoLife\Core\Controller\ResultInterface;
+use EcoLife\Core\Model\ImageUploader;
 use EcoLife\Testimonial\Model\Testimonial;
 use Throwable;
 
@@ -30,12 +31,20 @@ final class Delete extends AbstractAction
             return $this->resultRedirect()->setUrl($back);
         }
 
+        $photo = $testimonial->getPhotoPath();
+
         try {
             $testimonial->delete();
         } catch (Throwable $e) {
             Logger::exception($e);
             $messages->error('Could not remove that testimonial.');
             return $this->resultRedirect()->setUrl($back);
+        }
+
+        // After the row, never before: an orphaned file is untidy, but a row
+        // pointing at a file that is already gone renders as a broken avatar.
+        if ($photo !== '') {
+            (new ImageUploader('testimonial'))->delete($photo);
         }
 
         Logger::info('Testimonial deleted', [

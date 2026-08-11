@@ -36,6 +36,28 @@ final class Testimonial extends AbstractModel
         return (string) $this->getData('location', '');
     }
 
+    public function getBusiness(): string
+    {
+        return (string) $this->getData('business', '');
+    }
+
+    public function getPhotoPath(): string
+    {
+        return (string) $this->getData('photo_path', '');
+    }
+
+    /**
+     * A stored path is not a guarantee of a file. Media lives outside the
+     * repository, so a database restored onto a fresh server has rows whose
+     * images never came with it -- and a broken avatar beside a real quote
+     * reads as a broken site. The monogram is always available instead.
+     */
+    public function photoExists(): bool
+    {
+        return $this->getPhotoPath() !== ''
+            && is_file(BP . '/pub/media/' . ltrim($this->getPhotoPath(), '/'));
+    }
+
     public function getQuote(): string
     {
         return (string) $this->getData('quote');
