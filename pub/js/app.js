@@ -659,6 +659,28 @@
     }());
 
     /* ====================================================================== */
+    /* Destructive-action confirmation                                        */
+    /* ====================================================================== */
+
+    /**
+     * Confirms any form carrying data-confirm before it submits.
+     *
+     * The admin screens previously did this with onsubmit="return confirm(...)"
+     * on the element. That is dead under our Content-Security-Policy -- an
+     * inline handler is script, script-src is 'self', and the browser drops it
+     * silently. The delete went through unconfirmed and nothing anywhere said
+     * so. Delegated from the document, so it also covers markup added later.
+     */
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!form || !form.matches || !form.matches('[data-confirm]')) { return; }
+
+        if (!window.confirm(form.getAttribute('data-confirm'))) {
+            event.preventDefault();
+        }
+    });
+
+    /* ====================================================================== */
     /* Lead form                                                              */
     /* ====================================================================== */
 

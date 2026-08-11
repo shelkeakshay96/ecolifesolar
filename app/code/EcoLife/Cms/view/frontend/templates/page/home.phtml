@@ -70,6 +70,15 @@ $featured = array_shift($services);
     </div>
 </section>
 
+<?php /* ====================================================== proof strip */ ?>
+<?php /* Directly under the hero, because until now nothing on this page showed a
+         finished roof before the visitor reached /gallery. Renders nothing while
+         the gallery has no usable photos. */ ?>
+<?= $block->renderChild(\EcoLife\Gallery\Block\Strip::class, 'EcoLife_Gallery::strip.phtml',
+                        ['limit' => 4,
+                         'intro' => 'Real roofs in and around Satara, installed by the people who '
+                                  . 'surveyed them.']) ?>
+
 <?php /* ======================================================= solutions */ ?>
 <section id="solutions" class="section-shell py-20 lg:py-24">
     <div class="reveal">
@@ -129,9 +138,31 @@ $featured = array_shift($services);
                                             'EcoLife_Cms::page/service-icon.phtml',
                                             ['icon' => $service['icon']]) ?>
                 </span>
-                <h3 class="mt-4 text-[1.05rem]"><?= $block->escapeHtml($service['title']) ?></h3>
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    <h3 class="text-[1.05rem]"><?= $block->escapeHtml($service['title']) ?></h3>
+                    <?php if ($service['status'] === 'soon'): ?>
+                        <?php /* A visible badge, so this stops looking exactly as available as
+                                 the things we can install next week. */ ?>
+                        <span class="rounded-full border border-sand-dark bg-pearl-dim px-2.5 py-0.5
+                                     font-mono text-[.62rem] uppercase tracking-[.1em] text-muted">
+                            Coming soon
+                        </span>
+                    <?php endif; ?>
+                </div>
                 <p class="mt-2 text-[.87rem] leading-relaxed text-muted"><?= $block->escapeHtml($service['summary']) ?></p>
             </div>
+        <?php endforeach; ?>
+    </div>
+
+    <?php /* Every service above includes this. A strip, not a seventh card. */ ?>
+    <div class="reveal mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-sand
+                bg-pearl-dim px-5 py-4 text-[.82rem] text-muted">
+        <span class="font-mono text-[.7rem] uppercase tracking-[.1em] text-pine-600">Every job includes</span>
+        <?php foreach ($block->getExecutionSteps() as $index => $step): ?>
+            <?php if ($index > 0): ?>
+                <span class="text-sand-dark" aria-hidden="true">&middot;</span>
+            <?php endif; ?>
+            <span><?= $block->escapeHtml($step) ?></span>
         <?php endforeach; ?>
     </div>
 
@@ -161,6 +192,11 @@ $featured = array_shift($services);
         </div>
     </div>
 </section>
+
+<?php /* ====================================================== trust band */ ?>
+<?php /* No /0n eyebrow: this is a band, not a numbered section, so /03 and /04
+         below keep their numbers. */ ?>
+<?= $block->renderChild(\EcoLife\Cms\Block\Stats::class, 'EcoLife_Cms::page/trust-stats.phtml') ?>
 
 <?php /* ========================================================== process */ ?>
 <section class="section-shell py-20 lg:py-24">
@@ -237,6 +273,12 @@ $featured = array_shift($services);
         </div>
     </div>
 </section>
+
+<?php /* ==================================================== testimonials */ ?>
+<?php /* Renders nothing at all while the testimonial table is empty, so this
+         is safe to leave in place before any quotes have been collected. */ ?>
+<?= $block->renderChild(\EcoLife\Testimonial\Block\Testimonials::class,
+                        'EcoLife_Testimonial::testimonials.phtml', ['limit' => 3]) ?>
 
 <?php /* ============================================================= CTA */ ?>
 <section class="border-y border-gold-300/30 bg-gradient-to-br from-pine-500 to-pine-900 text-center">

@@ -29,14 +29,23 @@ $principles = [
     <div class="section-shell relative z-10 max-w-3xl py-20 lg:py-24">
         <p class="eyebrow reveal text-gold-300"><span class="opacity-60">/02</span> Why Eco Life</p>
         <h1 class="reveal mt-3 text-4xl text-pearl sm:text-5xl" data-word-reveal>
-            A family business, <em class="italic text-gold-300">in Satara.</em>
+            A renewable energy business, <em class="italic text-gold-300">in Satara.</em>
         </h1>
         <div class="gold-rule"></div>
-        <p class="reveal max-w-2xl text-[1.02rem] leading-relaxed text-pine-100/90">
-            <?= $block->escapeHtml($business) ?> installs rooftop solar across Satara and the
-            surrounding district. We are small on purpose: the people who survey your roof are
-            the people who install the system, and the people who come back if something needs
-            attention.
+        <?php /* The factual line, directly under the headline. It carries the founding
+                 date and the parent group, without which the two company names in the
+                 founder bios below read as an inconsistency. */ ?>
+        <p class="reveal max-w-2xl font-mono text-[.78rem] uppercase tracking-[.1em] text-gold-300">
+            Eco Life Green Infra LLP &mdash; the renewable-energy arm of Eco Life Group,
+            founded 2002, based in Satara
+        </p>
+
+        <p class="reveal mt-5 max-w-2xl text-[1.02rem] leading-relaxed text-pine-100/90">
+            <?= $block->escapeHtml($business) ?> designs, installs and maintains renewable
+            energy systems across Satara and the surrounding district &mdash; rooftop solar,
+            water heaters, solar pumps and street lighting. The people who survey your roof
+            are the people who install the system, and the people who come back if something
+            needs attention.
         </p>
     </div>
 </section>
@@ -53,6 +62,56 @@ $principles = [
                         <?= $block->escapeHtml($principle['text']) ?>
                     </p>
                 </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<?php /* Placed here rather than straight after the hero so both pages get the
+         same light -> dark -> light rhythm. Straight after the hero would put
+         pine-900 against pine-900 with only a hairline between them. */ ?>
+<?= $block->renderChild(\EcoLife\Cms\Block\Stats::class, 'EcoLife_Cms::page/trust-stats.phtml') ?>
+
+<?php /* ============================================================ team */ ?>
+<section class="border-b border-sand bg-pearl">
+    <div class="section-shell py-16 lg:py-20">
+        <div class="reveal max-w-2xl">
+            <p class="eyebrow">Who you will actually meet</p>
+            <h2 class="mt-3 text-3xl">The people behind Eco Life Green Infra</h2>
+            <p class="mt-4 text-[.95rem] leading-relaxed text-muted">
+                Three people, all reachable, all in Satara. If something on your roof needs
+                attention in year seven, one of them is who you will be speaking to.
+            </p>
+        </div>
+
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-reveal-stagger="110">
+            <?php foreach ($block->getTeam() as $person): ?>
+                <article class="reveal card card-lift">
+                    <?php if ($block->hasStaticFile($person['photo'])): ?>
+                        <img src="<?= $block->escapeUrl($block->getStaticUrl($person['photo'])) ?>"
+                             alt="<?= $block->escapeHtmlAttr($person['name']) ?>"
+                             class="mb-5 aspect-[4/5] w-full rounded-xl border border-sand object-cover object-top"
+                             loading="lazy" width="400" height="500">
+                    <?php else: ?>
+                        <?php /* Monogram until a photograph exists. A broken-image icon where a
+                                 founder's face should be is worse than no photograph. */ ?>
+                        <div class="mb-5 flex aspect-[4/5] w-full items-center justify-center rounded-xl
+                                    border border-sand bg-pine-100"
+                             aria-hidden="true">
+                            <span class="font-display text-4xl font-semibold text-pine-700">
+                                <?= $block->escapeHtml($block->getInitials($person['name'])) ?>
+                            </span>
+                        </div>
+                    <?php endif; ?>
+
+                    <h3 class="text-[1.05rem]"><?= $block->escapeHtml($person['name']) ?></h3>
+                    <p class="mt-1 font-mono text-[.7rem] uppercase tracking-[.08em] text-gold-600">
+                        <?= $block->escapeHtml($person['role']) ?>
+                    </p>
+                    <p class="mt-3 text-[.87rem] leading-relaxed text-muted">
+                        <?= $block->escapeHtml($person['credential']) ?>
+                    </p>
+                </article>
             <?php endforeach; ?>
         </div>
     </div>

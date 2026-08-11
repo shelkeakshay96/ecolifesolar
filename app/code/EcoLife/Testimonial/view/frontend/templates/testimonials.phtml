@@ -1,0 +1,60 @@
+<?php
+/**
+ * Customer quotes.
+ *
+ * The early return is the point of this template. With no active rows it emits
+ * nothing at all -- not an empty state, not a "testimonials coming soon" card,
+ * and certainly not invented quotes. The competitor comparison found that our
+ * honest, specific copy was the one thing already beating theirs; three
+ * plausible-sounding fake customers would have spent exactly that.
+ *
+ * @var \EcoLife\Testimonial\Block\Testimonials $block
+ */
+$testimonials = $block->getTestimonials();
+
+if ($testimonials === []) {
+    return;
+}
+?>
+<section class="section-shell py-20 lg:py-24">
+    <div class="reveal">
+        <p class="eyebrow"><span class="opacity-60">/05</span> In their words</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl">What people in Satara say afterwards</h2>
+    </div>
+
+    <div class="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-stagger="100">
+        <?php foreach ($testimonials as $testimonial): ?>
+            <figure class="reveal card card-lift flex flex-col border-t-2 border-t-gold-500">
+                <svg viewBox="0 0 32 32" class="h-7 w-7 shrink-0 text-gold-400" fill="currentColor" aria-hidden="true">
+                    <path d="M13 8v6.5c0 4.7-2.8 8.1-7 9.5l-1-2.4c2.6-1 4.2-2.8 4.5-5.1H5V8h8Zm14 0v6.5c0 4.7-2.8 8.1-7 9.5l-1-2.4c2.6-1 4.2-2.8 4.5-5.1H19V8h8Z"/>
+                </svg>
+
+                <?php /* lang= so a screen reader pronounces a Marathi quote as Marathi rather
+                         than reading Devanagari through an English voice. */ ?>
+                <blockquote class="mt-4 flex-1 text-[.95rem] leading-relaxed text-ink"
+                            lang="<?= $block->escapeHtmlAttr($testimonial->getLanguage()) ?>">
+                    <?= $block->escapeHtml($testimonial->getQuote()) ?>
+                </blockquote>
+
+                <figcaption class="mt-5 flex items-center gap-3 border-t border-sand pt-4">
+                    <?php /* A monogram, not a stock portrait. We do not have customer
+                             photographs and a stranger's face here would be a lie. */ ?>
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+                                 bg-pine-100 font-display text-[1.05rem] font-semibold text-pine-700">
+                        <?= $block->escapeHtml($testimonial->getInitial()) ?>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block text-[.9rem] font-semibold text-ink">
+                            <?= $block->escapeHtml($testimonial->getCustomerName()) ?>
+                        </span>
+                        <?php if ($testimonial->getMetaLabel() !== ''): ?>
+                            <span class="block font-mono text-[.7rem] uppercase tracking-[.08em] text-muted">
+                                <?= $block->escapeHtml($testimonial->getMetaLabel()) ?>
+                            </span>
+                        <?php endif; ?>
+                    </span>
+                </figcaption>
+            </figure>
+        <?php endforeach; ?>
+    </div>
+</section>

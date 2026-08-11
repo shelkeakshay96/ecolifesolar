@@ -9,7 +9,7 @@
  * @var \EcoLife\Core\View\Element\Template $block
  */
 $business  = $block->getSetting('general/business/name', 'Eco Life');
-$phone     = $block->getSetting('general/contact/phone');
+$phones    = $block->getContactNumbers();
 $whatsapp  = $block->getSetting('general/contact/whatsapp');
 $email     = $block->getSetting('general/contact/email');
 $address   = $block->getSetting('general/contact/address');
@@ -61,21 +61,44 @@ $instagram = $block->getSetting('general/social/instagram');
                     <li><a class="text-pine-100/85 transition hover:text-pearl" href="/about">Our process</a></li>
                     <li><a class="text-pine-100/85 transition hover:text-pearl" href="/contact">Request a quote</a></li>
                     <li><a class="text-pine-100/85 transition hover:text-pearl" href="#" data-soon="Blog">Blog</a></li>
-                    <li><a class="text-pine-100/85 transition hover:text-pearl" href="#" data-soon="Cities we serve">Cities we serve</a></li>
+                </ul>
+
+                <?php /* This replaces the "Cities we serve" data-soon stub, which was left here
+                         for exactly these pages. The list is literal rather than shared with
+                         Cms\Block\Page::getServiceAreas() because footer.phtml renders through a
+                         bare Template block with no data, and promoting the whole footer to its
+                         own block subclass to avoid four hrefs is a poor trade. */ ?>
+                <h2 class="mt-7 mb-4 font-mono text-[.72rem] uppercase tracking-[.1em] text-gold-300">Where we work</h2>
+                <ul class="space-y-2.5 text-[.88rem]">
+                    <?php foreach ([['/solar-in-satara', 'Solar in Satara'],
+                                    ['/solar-in-karad', 'Solar in Karad'],
+                                    ['/solar-in-wai', 'Solar in Wai'],
+                                    ['/solar-in-phaltan', 'Solar in Phaltan']] as [$href, $label]): ?>
+                        <li>
+                            <a class="text-pine-100/85 transition hover:text-pearl" href="<?= $block->escapeUrl($href) ?>">
+                                <?= $block->escapeHtml($label) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
 
             <div>
                 <h2 class="mb-4 font-mono text-[.72rem] uppercase tracking-[.1em] text-gold-300">Get in touch</h2>
                 <dl class="space-y-3 text-[.88rem]">
-                    <?php if ($phone !== ''): ?>
+                    <?php if ($phones !== []): ?>
                         <div>
                             <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/45">Phone</dt>
-                            <dd class="mt-0.5">
-                                <a class="transition hover:text-pearl" href="tel:<?= $block->escapeHtmlAttr(preg_replace('/\s+/', '', $phone)) ?>">
-                                    <?= $block->escapeHtml($phone) ?>
-                                </a>
-                            </dd>
+                            <?php /* One <dd> per number: a single dd holding two links would
+                                     read as one value to a screen reader, and each needs its
+                                     own tap target on a phone anyway. */ ?>
+                            <?php foreach ($phones as $phone): ?>
+                                <dd class="mt-0.5">
+                                    <a class="transition hover:text-pearl" href="tel:<?= $block->escapeHtmlAttr($phone['dial']) ?>">
+                                        <?= $block->escapeHtml($phone['display']) ?>
+                                    </a>
+                                </dd>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                     <?php if ($whatsapp !== ''): ?>

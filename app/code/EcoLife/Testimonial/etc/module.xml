@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+    Customer quotes, managed from the admin panel and rendered on the home page.
+
+    No frontend route and no frontend controller: there is no public
+    /testimonials page. The home page composes the section with renderChild(),
+    which is how cross module composition works here, an explicit call in a
+    template rather than configuration.
+-->
+<module name="EcoLife_Testimonial" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+        <module name="EcoLife_Theme"/>
+        <module name="EcoLife_Backend"/>
+    </sequence>
+</module>

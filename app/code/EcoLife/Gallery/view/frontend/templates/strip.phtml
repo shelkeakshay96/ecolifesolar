@@ -1,0 +1,60 @@
+<?php
+/**
+ * A short row of completed projects, linking through to the gallery.
+ *
+ * The cards link rather than opening the lightbox, deliberately. The lightbox
+ * in app.js collects [data-lightbox] across the whole document into one flat
+ * list, so a strip here plus the hero's existing lightbox card would merge into
+ * a single arrow-key sequence that walks between unrelated photographs. A link
+ * to /gallery is also what a visitor wanting more actually wants.
+ *
+ * Emits nothing when there are no usable photos, so a service-area page for a
+ * town we have not worked in yet simply does not carry the section.
+ *
+ * @var \EcoLife\Gallery\Block\Strip $block
+ */
+$items = $block->getItems();
+
+if ($items === []) {
+    return;
+}
+?>
+<section class="border-y border-sand bg-pearl-dim">
+    <div class="section-shell py-16 lg:py-20">
+        <div class="reveal flex flex-wrap items-end justify-between gap-4">
+            <div class="max-w-2xl">
+                <p class="eyebrow">Proof, not promises</p>
+                <h2 class="mt-3 text-3xl"><?= $block->escapeHtml($block->getHeading()) ?></h2>
+                <?php if ($block->getIntro() !== ''): ?>
+                    <p class="mt-3 text-[.92rem] leading-relaxed text-muted">
+                        <?= $block->escapeHtml($block->getIntro()) ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+            <a href="/gallery" class="nav-link text-[.85rem] font-semibold text-pine-600">See all our work &rarr;</a>
+        </div>
+
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger="80">
+            <?php foreach ($items as $item): ?>
+                <?php $meta = array_filter([$item->getSizeLabel(), $item->getLocation()]); ?>
+                <a href="/gallery" class="reveal group block overflow-hidden rounded-2xl border border-sand bg-white
+                                          transition hover:border-gold-400 hover:shadow-eco">
+                    <span class="block aspect-[4/3] overflow-hidden bg-pearl-dim">
+                        <img src="<?= $block->escapeUrl($block->getMediaUrl((string) ($item->getData('thumbnail_path') ?: $item->getImagePath()))) ?>"
+                             alt="<?= $block->escapeHtmlAttr($item->getTitle()) ?>"
+                             class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                             loading="lazy">
+                    </span>
+                    <span class="block p-4">
+                        <span class="block text-[.95rem] font-semibold text-ink"><?= $block->escapeHtml($item->getTitle()) ?></span>
+                        <?php if ($meta !== []): ?>
+                            <span class="mt-1 block font-mono text-[.7rem] uppercase tracking-[.08em] text-muted">
+                                <?= $block->escapeHtml(implode(' · ', $meta)) ?>
+                            </span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>

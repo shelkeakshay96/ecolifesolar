@@ -12,7 +12,7 @@
  *
  * @var \EcoLife\Core\View\Element\Template $block
  */
-$phone    = $block->getSetting('general/contact/phone');
+$phones   = $block->getContactNumbers();
 $business = $block->getSetting('general/business/name', 'Eco Life');
 $current  = $block->getRequest()->getPathInfo();
 
@@ -48,15 +48,29 @@ $links = [
         </nav>
 
         <div class="flex items-center gap-3">
-            <?php if ($phone !== ''): ?>
-                <a href="tel:<?= $block->escapeHtmlAttr(preg_replace('/\s+/', '', $phone)) ?>"
-                   class="hidden items-center gap-2 font-mono text-[.75rem] text-gold-300 transition hover:text-gold-200 sm:flex">
-                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <?php /* Every number, stacked. One icon for the group rather than one per
+                     line: repeating it down the column reads as a list of different
+                     things rather than one way of reaching us. Each line is still its
+                     own link, so each dials only itself.
+
+                     Two lines of .75rem sit inside the logo's height, so the bar does
+                     not grow. Three would; if it ever comes to that, the answer is to
+                     drop this to the primary number and leave the rest to the menu. */ ?>
+            <?php if ($phones !== []): ?>
+                <div class="hidden items-center gap-2 text-gold-300 sm:flex">
+                    <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round"
                               d="M2.25 6.75c0 8.28 6.72 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.37a1.13 1.13 0 0 0-.85-1.09l-4.42-1.1a1.12 1.12 0 0 0-1.17.42l-.97 1.29a13.5 13.5 0 0 1-6.02-6.02l1.3-.97c.38-.29.54-.76.42-1.17l-1.11-4.42a1.13 1.13 0 0 0-1.09-.85H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
                     </svg>
-                    <?= $block->escapeHtml($phone) ?>
-                </a>
+                    <span class="flex flex-col leading-[1.45]">
+                        <?php foreach ($phones as $phone): ?>
+                            <a href="tel:<?= $block->escapeHtmlAttr($phone['dial']) ?>"
+                               class="font-mono text-[.75rem] whitespace-nowrap transition hover:text-gold-200">
+                                <?= $block->escapeHtml($phone['display']) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </span>
+                </div>
             <?php endif; ?>
 
             <a href="/contact" class="btn-gold btn-compact hidden sm:inline-flex" data-magnetic="0.18">
@@ -83,6 +97,27 @@ $links = [
                     <?= $block->escapeHtml($label) ?>
                 </a>
             <?php endforeach; ?>
+
+            <?php /* The header's phone link is hidden below sm, so without this a phone
+                     visitor -- almost all of them -- had no number to tap anywhere above
+                     the footer. One link per number, each dialling only itself. */ ?>
+            <?php if ($phones !== []): ?>
+                <div class="mt-4 border-t border-gold-300/20 pt-4">
+                    <p class="px-4 font-mono text-[.66rem] uppercase tracking-[.1em] text-pine-100/50">Call us</p>
+                    <?php foreach ($phones as $phone): ?>
+                        <a href="tel:<?= $block->escapeHtmlAttr($phone['dial']) ?>"
+                           class="flex items-center gap-3 rounded-xl px-4 py-3 font-mono text-[.9rem]
+                                  text-gold-300 hover:bg-pine-800">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor"
+                                 stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M2.25 6.75c0 8.28 6.72 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.37a1.13 1.13 0 0 0-.85-1.09l-4.42-1.1a1.12 1.12 0 0 0-1.17.42l-.97 1.29a13.5 13.5 0 0 1-6.02-6.02l1.3-.97c.38-.29.54-.76.42-1.17l-1.11-4.42a1.13 1.13 0 0 0-1.09-.85H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
+                            </svg>
+                            <?= $block->escapeHtml($phone['display']) ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
             <a href="/contact" class="btn-gold mt-3 w-full">Get Free Quote</a>
         </div>

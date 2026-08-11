@@ -41,24 +41,44 @@ final class Index extends AbstractAction
 
         $saved = 0;
 
+        // Two passes, and the split matters. Validating and saving in one loop
+        // meant a bad value in the seventh field left the first six already
+        // written while the screen reported nothing but an error -- the family
+        // would have had no way to know half their edit had landed. Nothing is
+        // written until every submitted value has passed.
+        $valid = [];
+
+        // Only paths this screen knows about are writable. Without the
+        // whitelist, a crafted POST could create arbitrary config rows.
+        foreach (Settings::editablePaths() as $path => $meta) {
+            if (!array_key_exists($path, $submitted)) {
+                continue;
+            }
+
+            $value = trim((string) $submitted[$path]);
+            $type  = $meta['type'] ?? 'text';
+
+            if ($type === 'email' && $value !== ''
+                && !str_contains($path, 'recipients')
+                && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $messages->error(sprintf('"%s" is not a valid email address. Nothing was saved.', $meta['label']));
+                return $this->resultRedirect()->setUrl($back);
+            }
+
+            if ($type === 'number' && $value !== '' && !ctype_digit($value)) {
+                $messages->error(sprintf(
+                    '"%s" must be a whole number -- digits only, no "+" and no commas. Nothing was saved.',
+                    $meta['label']
+                ));
+                return $this->resultRedirect()->setUrl($back);
+            }
+
+            $valid[$path] = $value !== '' ? mb_substr($value, 0, 65535) : null;
+        }
+
         try {
-            // Only paths this screen knows about are writable. Without the
-            // whitelist, a crafted POST could create arbitrary config rows.
-            foreach (Settings::editablePaths() as $path => $meta) {
-                if (!array_key_exists($path, $submitted)) {
-                    continue;
-                }
-
-                $value = trim((string) $submitted[$path]);
-
-                if (($meta['type'] ?? 'text') === 'email' && $value !== ''
-                    && !str_contains($path, 'recipients')
-                    && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    $messages->error(sprintf('"%s" is not a valid email address.', $meta['label']));
-                    return $this->resultRedirect()->setUrl($back);
-                }
-
-                SettingsModel::save($path, $value !== '' ? mb_substr($value, 0, 65535) : null);
+            foreach ($valid as $path => $value) {
+                SettingsModel::save($path, $value);
                 $saved++;
             }
         } catch (Throwable $e) {

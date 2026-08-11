@@ -40,4 +40,27 @@ final class Collection extends AbstractCollection
 
         return $this;
     }
+
+    /**
+     * Active items whose location mentions a town, for the service-area pages.
+     *
+     * A LIKE rather than a foreign key to a towns table: location is free text
+     * the family types, and it will read "Karad, Maharashtra" or "near Karad"
+     * or just "Karad" depending on the day. A substring match is the honest
+     * shape of that data. It also means a page can quietly show nothing, which
+     * the template handles.
+     */
+    public function forTown(string $town, ?int $limit = null): self
+    {
+        $this->addFieldToFilter('is_active', 1)
+             ->addFieldToFilter('location', ['like' => '%' . $town . '%'])
+             ->addOrder('sort_order', self::SORT_ASC)
+             ->addOrder('item_id', self::SORT_DESC);
+
+        if ($limit !== null && $limit > 0) {
+            $this->setPageSize($limit)->setCurPage(1);
+        }
+
+        return $this;
+    }
 }

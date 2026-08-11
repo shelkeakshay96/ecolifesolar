@@ -16,12 +16,15 @@ use Throwable;
 /**
  * The bin/ecolife command line.
  *
- * A flat dispatcher rather than a command framework: eight commands, each a
+ * A flat dispatcher rather than a command framework: ten commands, each a
  * method, no registry and no argument parser beyond what is actually used.
  */
 final class Cli
 {
+    private const STYLESHEET = BP . '/pub/css/ecolife.css';
+
     private const COMMANDS = [
+        'serve'             => 'Run the development server on pub/ (--port, --host, --watch)',
         'module:status'     => 'List modules in load order, with their migrations',
         'setup:upgrade'     => 'Apply pending migrations (--dry-run to preview)',
         'db:reset'          => 'Drop and recreate the schema, then upgrade (--force to skip the prompt)',
@@ -43,6 +46,7 @@ final class Cli
 
         try {
             return match ($command) {
+                'serve'             => $cli->serve($args),
                 'module:status'     => $cli->moduleStatus(),
                 'setup:upgrade'     => $cli->setupUpgrade(in_array('--dry-run', $args, true)),
                 'db:reset'          => $cli->dbReset(in_array('--force', $args, true)),
@@ -317,31 +321,194 @@ final class Cli
 
     private function assetsBuild(bool $watch): int
     {
-        $binary = BP . '/tools/tailwindcss';
-        if (!is_executable($binary)) {
-            self::error('tools/tailwindcss is missing. Run: bash bin/tailwind-install.sh');
+        $command = $this->tailwindCommand($watch);
+        if ($command === null) {
             return 1;
         }
 
-        $command = sprintf(
+        passthru($command, $exitCode);
+
+        if (!$watch && $exitCode === 0) {
+            $size = @filesize(self::STYLESHEET);
+            self::ok('pub/css/ecolife.css written' . ($size ? ' (' . number_format($size / 1024, 1) . ' KB)' : ''));
+        }
+
+        return $exitCode;
+    }
+
+    /**
+     * The one place that knows how to invoke Tailwind. `serve --watch` and
+     * `assets:build` share it so the flags cannot drift apart.
+     *
+     * Returns null, having already reported why, when the binary is missing.
+     */
+    private function tailwindCommand(bool $watch): ?string
+    {
+        $binary = BP . '/tools/tailwindcss';
+        if (!is_executable($binary)) {
+            self::error('tools/tailwindcss is missing. Run: bash bin/tailwind-install.sh');
+            return null;
+        }
+
+        return sprintf(
             '%s -i %s -o %s %s',
             escapeshellarg($binary),
             escapeshellarg(BP . '/app/code/EcoLife/Theme/view/base/web/css/input.css'),
-            escapeshellarg(BP . '/pub/css/ecolife.css'),
+            escapeshellarg(self::STYLESHEET),
             // =always, not plain --watch: Tailwind stops watching when stdin
             // closes, so a backgrounded `bin/ecolife assets:build --watch`
             // would do one build and then sit there looking healthy.
             $watch ? '--watch=always' : '--minify'
         );
+    }
 
-        passthru($command, $exitCode);
+    /**
+     * Runs the site locally.
+     *
+     * The document root is pinned to pub/ and derived from BP, not from
+     * wherever the command was invoked. That is the entire reason this command
+     * exists rather than a line in a README: `php -S` from the project root
+     * would happily serve app/etc/env.php, and env.php holds the database
+     * password.
+     *
+     * @param list<string> $args
+     */
+    private function serve(array $args): int
+    {
+        $host  = self::option($args, '--host', '0.0.0.0');
+        $port  = (int) self::option($args, '--port', '8080');
+        $watch = in_array('--watch', $args, true);
+        $root  = BP . '/pub';
 
-        if (!$watch && $exitCode === 0) {
-            $size = @filesize(BP . '/pub/css/ecolife.css');
-            self::ok('pub/css/ecolife.css written' . ($size ? ' (' . number_format($size / 1024, 1) . ' KB)' : ''));
+        if ($port < 1 || $port > 65535) {
+            self::error('--port must be between 1 and 65535.');
+            return 1;
         }
 
+        // A host reaches the shell below, so it is restricted to the shapes a
+        // bind address can actually take rather than merely escaped.
+        if (!preg_match('/^(\[[0-9a-f:]+\]|[0-9a-z.\-]+)$/i', $host)) {
+            self::error('--host must be a hostname, an IPv4 address, or a bracketed IPv6 address.');
+            return 1;
+        }
+
+        self::heading('Development server');
+
+        // ---- preflight. Fail here with a sentence, rather than in the
+        //      bootstrap of whatever page the visitor asked for first.
+
+        try {
+            Db::instance();
+            self::ok('MySQL reachable');
+        } catch (Throwable $e) {
+            self::error('MySQL is not reachable: ' . $e->getMessage());
+            self::warn('Start it with: sudo service mysql start');
+            return 1;
+        }
+
+        if (!is_file(self::STYLESHEET)) {
+            if (!$watch) {
+                self::error('pub/css/ecolife.css has not been built.');
+                self::warn('Run: bin/ecolife assets:build   (or add --watch here)');
+                return 1;
+            }
+            self::warn('pub/css/ecolife.css missing — the watcher will build it now.');
+        } else {
+            self::ok('Stylesheet present');
+        }
+
+        if (self::portInUse($port)) {
+            self::error("Port {$port} is already in use.");
+            self::warn("Stop the process holding it, or pass --port=" . ($port + 1));
+            return 1;
+        }
+
+        // ---- optional stylesheet watcher, alongside the server
+
+        $tailwind = null;
+        if ($watch) {
+            $command = $this->tailwindCommand(true);
+            if ($command === null) {
+                return 1;
+            }
+
+            // Inherit stdout and stderr so rebuild lines appear in the same
+            // terminal. The child shares this process group, so the Ctrl-C
+            // that stops the server stops the watcher too; the shutdown
+            // function covers every other way out.
+            $tailwind = proc_open($command, [1 => STDOUT, 2 => STDERR], $pipes);
+
+            if (is_resource($tailwind)) {
+                self::ok('Tailwind watching for template changes');
+                register_shutdown_function(static function () use ($tailwind) {
+                    if (is_resource($tailwind)) {
+                        proc_terminate($tailwind);
+                        proc_close($tailwind);
+                    }
+                });
+            } else {
+                self::warn('Could not start the Tailwind watcher; serving the stylesheet as built.');
+            }
+        }
+
+        // ---- addresses
+
+        echo "\n";
+        self::ok('Document root  ' . $root);
+        self::ok('Local          http://localhost:' . $port);
+
+        $lan = self::lanAddress();
+        if ($lan !== null) {
+            // Under WSL2 this is also the address to use from Windows if
+            // localhost forwarding is turned off, and the only one that works
+            // from a phone on the same network.
+            self::ok('Network        http://' . $lan . ':' . $port);
+        }
+
+        self::ok('Admin          http://localhost:' . $port . '/admin');
+        echo "\n  Ctrl-C to stop.\n\n";
+
+        passthru(sprintf(
+            '%s -S %s -t %s',
+            escapeshellarg(PHP_BINARY),
+            escapeshellarg($host . ':' . $port),
+            escapeshellarg($root)
+        ), $exitCode);
+
         return $exitCode;
+    }
+
+    /** Reads `--name=value` out of the argument list. */
+    private static function option(array $args, string $name, string $default): string
+    {
+        foreach ($args as $arg) {
+            if (str_starts_with($arg, $name . '=')) {
+                return substr($arg, strlen($name) + 1);
+            }
+        }
+
+        return $default;
+    }
+
+    /** True when something already answers on the loopback interface. */
+    private static function portInUse(int $port): bool
+    {
+        $socket = @stream_socket_client("tcp://127.0.0.1:{$port}", $errno, $error, 0.3);
+        if ($socket === false) {
+            return false;
+        }
+
+        fclose($socket);
+        return true;
+    }
+
+    /** The first non-loopback address of this host, if there is one. */
+    private static function lanAddress(): ?string
+    {
+        $output = @shell_exec('hostname -I 2>/dev/null');
+        $first  = strtok(trim((string) $output), ' ');
+
+        return ($first === false || $first === '' || str_starts_with($first, '127.')) ? null : $first;
     }
 
     /**

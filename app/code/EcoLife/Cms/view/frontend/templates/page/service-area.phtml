@@ -1,0 +1,124 @@
+<?php
+/**
+ * One template, four towns.
+ *
+ * Which town is decided by the pages.php identifier the controller passed in,
+ * so adding a fifth is an entry in Cms/etc/pages.php plus an entry in
+ * Cms\Block\Page::getServiceAreas() -- no template, no controller, no route.
+ *
+ * The completed-projects strip is filtered on the town name appearing in the
+ * gallery item's location, so a town we have not worked in yet simply carries
+ * no strip rather than an empty one.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+$area = $block->getServiceArea();
+
+if ($area === null) {
+    return;
+}
+
+$whatsapp = $block->getWhatsappLink();
+?>
+<section class="relative overflow-hidden border-b border-gold-300/30 bg-pine-900">
+    <div class="absolute inset-0 scale-110 bg-cover bg-center opacity-20"
+         style="background-image:url('<?= $block->escapeUrl($block->getStaticUrl('images/panels.jpg')) ?>')"
+         data-parallax="0.08" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-pine-900/85 to-pine-900" aria-hidden="true"></div>
+
+    <div class="section-shell relative z-10 max-w-3xl py-20 lg:py-24" data-leaf-zone>
+        <p class="eyebrow reveal text-gold-300">Where we work</p>
+        <h1 class="reveal mt-3 text-4xl text-pearl sm:text-5xl" data-word-reveal>
+            <?= $block->escapeHtml($area['headline']) ?>
+        </h1>
+        <div class="gold-rule"></div>
+        <p class="reveal max-w-2xl text-[1.02rem] leading-relaxed text-pine-100/90">
+            <?= $block->escapeHtml($area['intro']) ?>
+        </p>
+        <p class="reveal mt-4 max-w-2xl text-[.92rem] leading-relaxed text-pine-100/70">
+            <?= $block->escapeHtml($area['note']) ?>
+        </p>
+
+        <div class="reveal mt-9 flex flex-wrap gap-4">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.2">
+                Book a free site visit in <?= $block->escapeHtml($area['town']) ?>
+            </a>
+            <a href="/calculator" class="btn-outline">See what you could save</a>
+        </div>
+
+        <?php if ($whatsapp !== ''): ?>
+            <p class="reveal mt-5 text-[.85rem] text-pine-100/70">
+                Or send us a message on
+                <a href="<?= $block->escapeUrl($whatsapp) ?>" target="_blank" rel="noopener"
+                   class="font-semibold text-gold-300 underline-offset-4 hover:underline">WhatsApp</a>.
+            </p>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php /* Completed work in this town, if we have any. */ ?>
+<?= $block->renderChild(\EcoLife\Gallery\Block\Strip::class, 'EcoLife_Gallery::strip.phtml',
+                        ['limit'   => 4,
+                         'town'    => $area['town'],
+                         'heading' => 'Installations in ' . $area['town'],
+                         'intro'   => 'Photographs from jobs we have finished nearby.']) ?>
+
+<?php /* ======================================================== subsidy */ ?>
+<section class="border-b border-sand bg-pearl">
+    <div class="section-shell grid gap-10 py-16 lg:grid-cols-2 lg:py-20">
+        <div class="reveal">
+            <p class="eyebrow">The subsidy</p>
+            <h2 class="mt-3 text-3xl">PM Surya Ghar, and the paperwork</h2>
+            <p class="mt-4 text-[.95rem] leading-relaxed text-muted">
+                Households installing rooftop solar can claim a central-government subsidy under
+                PM Surya Ghar: Muft Bijli Yojana. The amount depends on the size of the system
+                and on rules that change, so we will tell you what applies to your roof when we
+                survey it rather than quote a figure here that may be out of date by the time
+                you read it.
+            </p>
+            <p class="mt-4 text-[.95rem] leading-relaxed text-muted">
+                We handle the application, the net-metering paperwork and the DISCOM
+                co-ordination as part of the job. It is not a separate charge and it is not
+                something we leave with you.
+            </p>
+        </div>
+
+        <div class="reveal reveal-right card border-t-2 border-t-gold-500">
+            <h3 class="text-[1.05rem]">What happens in <?= $block->escapeHtml($area['town']) ?></h3>
+            <ol class="mt-4 space-y-3 text-[.88rem] text-muted">
+                <?php foreach ($block->getProcess() as $stage): ?>
+                    <li class="flex gap-3">
+                        <span class="font-mono text-[.72rem] text-gold-600"><?= $block->escapeHtml($stage['step']) ?></span>
+                        <span><span class="font-semibold text-ink"><?= $block->escapeHtml($stage['title']) ?></span>
+                            &mdash; <?= $block->escapeHtml($stage['text']) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </div>
+</section>
+
+<?php /* ====================================================== other towns */ ?>
+<section class="section-shell py-16 lg:py-20">
+    <div class="reveal">
+        <p class="eyebrow">Satara district</p>
+        <h2 class="mt-3 text-3xl">We also work in</h2>
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-3" data-reveal-stagger="70">
+        <?php foreach ($block->getServiceAreas() as $identifier => $other): ?>
+            <?php if ($identifier === $block->getIdentifier()) { continue; } ?>
+            <a href="<?= $block->escapeUrl('/' . $identifier) ?>"
+               class="reveal rounded-full border border-sand bg-white px-5 py-2.5 text-[.9rem] font-semibold
+                      text-ink transition hover:border-gold-400 hover:text-pine-600">
+                <?= $block->escapeHtml($other['town']) ?>
+            </a>
+        <?php endforeach; ?>
+    </div>
+
+    <p class="reveal mt-6 max-w-2xl text-[.9rem] leading-relaxed text-muted">
+        And the villages in between. If your town is not on this list, ask anyway &mdash; most of
+        Satara district is within reach, and we would rather tell you no over the phone than have
+        you assume it.
+    </p>
+</section>

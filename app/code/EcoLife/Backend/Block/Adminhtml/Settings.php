@@ -27,8 +27,10 @@ final class Settings extends AbstractBlock
                 'help'  => 'Printed in the footer. Leave blank to hide it.',
             ],
             'general/contact/phone' => [
-                'label' => 'Phone number', 'group' => 'Contact', 'type' => 'text',
-                'help'  => 'Shown in the header and footer, and used for the call button.',
+                'label' => 'Phone numbers', 'group' => 'Contact', 'type' => 'text',
+                'help'  => 'Separate several with commas, e.g. +91 98765 43210, +91 91234 56789. '
+                         . 'Each one gets its own tap-to-call link. The first is the one shown '
+                         . 'in the header.',
             ],
             'general/contact/whatsapp' => [
                 'label' => 'WhatsApp number', 'group' => 'Contact', 'type' => 'text',
@@ -51,6 +53,22 @@ final class Settings extends AbstractBlock
             ],
             'general/social/instagram' => [
                 'label' => 'Instagram profile URL', 'group' => 'Social', 'type' => 'text', 'help' => '',
+            ],
+            'general/stats/installations' => [
+                'label' => 'Rooftop installations completed', 'group' => 'Numbers on the site', 'type' => 'number',
+                'help'  => 'Digits only, no "+". Shown on the home and About pages as "120+".',
+            ],
+            'general/stats/capacity_kw' => [
+                'label' => 'Total capacity installed (KW)', 'group' => 'Numbers on the site', 'type' => 'number',
+                'help'  => 'Digits only, in kilowatts. Shown as "600 KW+".',
+            ],
+            'general/stats/water_heaters' => [
+                'label' => 'Solar water heaters installed', 'group' => 'Numbers on the site', 'type' => 'number',
+                'help'  => 'Digits only. Shown as "500+".',
+            ],
+            'general/stats/experience_years' => [
+                'label' => 'Years of experience', 'group' => 'Numbers on the site', 'type' => 'number',
+                'help'  => 'Digits only. Shown as "20+". Clear any of these four to hide that figure entirely.',
             ],
             'lead/notification/recipients' => [
                 'label' => 'Send new enquiries to', 'group' => 'Enquiries', 'type' => 'email',

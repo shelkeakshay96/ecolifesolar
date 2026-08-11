@@ -8,7 +8,7 @@
  *
  * @var \EcoLife\Cms\Block\Page $block
  */
-$phone    = $block->getSetting('general/contact/phone');
+$phones   = $block->getContactNumbers();
 $email    = $block->getSetting('general/contact/email');
 $address  = $block->getSetting('general/contact/address');
 $hours    = $block->getSetting('general/contact/hours');
@@ -40,14 +40,25 @@ $whatsapp = $block->getWhatsappLink();
             <div class="card-dark">
                 <h2 class="font-mono text-[.72rem] uppercase tracking-[.1em] text-gold-300">Reach us directly</h2>
                 <dl class="mt-5 space-y-4 text-[.92rem]">
-                    <?php if ($phone !== ''): ?>
+                    <?php if ($phones !== []): ?>
                         <div>
                             <dt class="font-mono text-[.66rem] uppercase tracking-[.08em] text-pine-100/50">Phone</dt>
-                            <dd class="mt-1">
-                                <a class="transition hover:text-pearl" href="tel:<?= $block->escapeHtmlAttr(preg_replace('/\s+/', '', $phone)) ?>">
-                                    <?= $block->escapeHtml($phone) ?>
-                                </a>
-                            </dd>
+                            <?php /* One tap target per number. This is the page a visitor lands
+                                     on when they have decided to ring, so each number is a full
+                                     row rather than a run of text. */ ?>
+                            <?php foreach ($phones as $phone): ?>
+                                <dd class="mt-1">
+                                    <a class="flex items-center gap-2 transition hover:text-pearl"
+                                       href="tel:<?= $block->escapeHtmlAttr($phone['dial']) ?>">
+                                        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-gold-300" fill="none"
+                                             stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M2.25 6.75c0 8.28 6.72 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.37a1.13 1.13 0 0 0-.85-1.09l-4.42-1.1a1.12 1.12 0 0 0-1.17.42l-.97 1.29a13.5 13.5 0 0 1-6.02-6.02l1.3-.97c.38-.29.54-.76.42-1.17l-1.11-4.42a1.13 1.13 0 0 0-1.09-.85H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
+                                        </svg>
+                                        <?= $block->escapeHtml($phone['display']) ?>
+                                    </a>
+                                </dd>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                     <?php if ($email !== ''): ?>

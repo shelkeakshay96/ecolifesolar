@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+    Plural front name, singular entity controller, matching EcoLife_Lead.
+
+    /admin/testimonials                          Controller\Adminhtml\Index\Index
+    /admin/testimonials/testimonial/save         Controller\Adminhtml\Testimonial\Save
+    /admin/testimonials/testimonial/delete/id/5  Controller\Adminhtml\Testimonial\Delete
+
+    The grid has to live under Index/ because the Standard router defaults both
+    the controller and the action segment to "index", so /admin/testimonials on
+    its own can never reach Adminhtml\Testimonial\Index.
+-->
+<routes>
+    <route id="testimonials" frontName="testimonials">
+        <module name="EcoLife_Testimonial"/>
+    </route>
+</routes>

@@ -297,6 +297,13 @@
   @apply text-[.95rem] leading-relaxed text-muted;
 }
 
+/* Tells the counter shimmer what colour to fade back to. Put it on any dark
+   section that contains a [data-count-to]; without it the numerals shimmer
+   towards pine-800 and disappear into the background while counting. */
+@utility counting-on-dark {
+  --counting-base: var(--color-pearl);
+}
+
 @layer components {
   /* Selected chip. A compound selector, so it cannot be an @utility.
      The chip wraps a real radio input: the selected state is the input's, not
@@ -541,15 +548,32 @@
   }
   .lightbox.is-open img { transform: scale(1); }
 
-  /* ------------------------------------------------------- counter shimmer */
+  /* ------------------------------------------------------- counter shimmer
+
+     The resting colour is a custom property, not a literal. app.js puts this
+     same class on figures over pearl (the calculator) and over pine-900 (the
+     trust band), and it has no idea which -- nor should it. Hardcoding
+     pine-800 here made the trust-band numerals a near-black smear for the
+     whole 1.1s of the count-up. Any ancestor can now say what the text on it
+     is meant to look like; see @utility counting-on-dark.
+
+     color: transparent lives inside the @supports so an engine without
+     background-clip: text keeps a readable, un-shimmered number rather than a
+     blank space. The number is the point; the shimmer is decoration. */
   .is-counting {
-    background: linear-gradient(90deg,
-      var(--color-pine-800) 20%, var(--color-gold-500) 50%, var(--color-pine-800) 80%);
+    --counting-base: var(--color-pine-800);
+    background-image: linear-gradient(90deg,
+      var(--counting-base) 20%, var(--color-gold-500) 50%, var(--counting-base) 80%);
     background-size: 220% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
     animation: var(--animate-shimmer);
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .is-counting {
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   }
 }
 

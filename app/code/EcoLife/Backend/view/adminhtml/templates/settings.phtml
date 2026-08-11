@@ -53,6 +53,14 @@ $placeholders = $block->getPlaceholderCount();
                                            <?= $block->escapeHtmlAttr($setting['value'] === '1' ? 'checked' : '') ?>>
                                     <span>Yes</span>
                                 </label>
+                            <?php elseif ($setting['type'] === 'number'): ?>
+                                <?php /* type=number and inputmode get the right keypad on a phone
+                                         and reject letters in most browsers. Neither is the guard:
+                                         the save controller runs ctype_digit regardless. */ ?>
+                                <input class="form-input" type="number" min="0" step="1" inputmode="numeric"
+                                       id="<?= $block->escapeHtmlAttr($id) ?>"
+                                       name="setting[<?= $block->escapeHtmlAttr($path) ?>]"
+                                       value="<?= $block->escapeHtmlAttr($setting['value']) ?>">
                             <?php else: ?>
                                 <input class="form-input" type="text"
                                        id="<?= $block->escapeHtmlAttr($id) ?>"

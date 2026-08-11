@@ -1,0 +1,46 @@
+# pub/media/ is the only directory in the application that a stranger can
+# cause a file to appear in, via the gallery image upload. ImageUploader
+# already validates extension, MIME and getimagesize(), and re-encodes every
+# image through GD so a file carrying PHP in its metadata does not survive the
+# round trip.
+#
+# This file is the second lock. If the uploader is ever bypassed, whatever
+# lands here must still be inert.
+
+# Serve as data, never as code.
+#
+# php_flag is a mod_php directive. Every occurrence below is wrapped in an
+# IfModule guard and none may be unwrapped: under PHP-FPM, LiteSpeed or suPHP
+# -- which is what cPanel shared hosting actually runs -- an unguarded
+# php_flag is an unknown directive, and Apache answers the whole site with
+# 500 Internal Server Error rather than ignoring it.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# php_flag is ignored under PHP-FPM / suPHP / LiteSpeed, which is what most
+# shared hosts actually run. Removing the handler is what works there.
+<IfModule mod_mime.c>
+    RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phar .cgi .pl .py
+    RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phar
+</IfModule>
+
+# And the belt to that pair of braces: refuse the requests outright.
+<FilesMatch "\.(php|phtml|phar|php[0-9]|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Nothing here is executable, whatever it claims to be.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

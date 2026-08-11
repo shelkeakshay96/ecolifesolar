@@ -21,10 +21,18 @@ final class Page extends AbstractBlock
     }
 
     /**
-     * The four things the business installs. Carried over from the original
-     * static site, where they were four hand-written cards.
+     * The six things the business installs.
      *
-     * @return list<array{title: string, summary: string, points: list<string>, icon: string}>
+     * Solar pumps and solar street lights were missing from the site entirely
+     * even though the business has been doing both for years -- and neither is
+     * something the Satara competitor offers at all, which makes them the two
+     * most worth naming.
+     *
+     * `status` is 'active' or 'soon'. Battery storage is the only 'soon' one,
+     * and the badge exists so it stops sitting on the page looking exactly as
+     * available as the five things we can actually install tomorrow.
+     *
+     * @return list<array{title: string, summary: string, points: list<string>, icon: string, status: string}>
      */
     public function getServices(): array
     {
@@ -40,28 +48,44 @@ final class Page extends AbstractBlock
                     'PM Surya Ghar subsidy paperwork assistance',
                 ],
                 'icon'    => 'panel',
+                'status'  => 'active',
             ],
             [
                 'title'   => 'Solar Water Heaters',
                 'summary' => 'Evacuated tube and flat plate systems that take the water heating '
-                           . 'load off your electricity bill entirely.',
+                           . 'load off your electricity bill entirely. This is where the business '
+                           . 'started, and where the 500-odd installations behind us began.',
                 'points'  => [
                     '100 to 500 litre capacities',
-                    'Suits homes and small hotels',
+                    'Suits homes, hostels and small hotels',
                     'Low maintenance, long service life',
                 ],
                 'icon'    => 'heater',
+                'status'  => 'active',
             ],
             [
-                'title'   => 'Battery Energy Storage',
-                'summary' => 'Store what your panels generate and keep the essentials running '
-                           . 'through a power cut.',
+                'title'   => 'Solar Pumps',
+                'summary' => 'Solar-powered pumping for farms and small businesses, so irrigation '
+                           . 'stops depending on when the supply happens to be on.',
                 'points'  => [
-                    'Hybrid inverter systems',
-                    'Backup for lights, fans and pumps',
-                    'Sized around your critical load',
+                    'Surface and submersible pumps',
+                    'Sized to your borewell and your acreage',
+                    'No diesel, no running cost',
                 ],
-                'icon'    => 'battery',
+                'icon'    => 'pump',
+                'status'  => 'active',
+            ],
+            [
+                'title'   => 'Solar Street Lights',
+                'summary' => 'Standalone lighting for lanes, compounds, farms and society '
+                           . 'common areas, with no cabling back to a meter.',
+                'points'  => [
+                    'Integrated panel, battery and LED',
+                    'Dusk-to-dawn automatic operation',
+                    'Suits gram panchayat and society use',
+                ],
+                'icon'    => 'streetlight',
+                'status'  => 'active',
             ],
             [
                 'title'   => 'Electrical Work',
@@ -73,7 +97,38 @@ final class Page extends AbstractBlock
                     'Repairs and maintenance',
                 ],
                 'icon'    => 'bolt',
+                'status'  => 'active',
             ],
+            [
+                'title'   => 'Battery Energy Storage',
+                'summary' => 'Store what your panels generate and keep the essentials running '
+                           . 'through a power cut. We are not installing these yet -- ask us and '
+                           . 'we will tell you honestly where we have got to.',
+                'points'  => [
+                    'Hybrid inverter systems',
+                    'Backup for lights, fans and pumps',
+                    'Sized around your critical load',
+                ],
+                'icon'    => 'battery',
+                'status'  => 'soon',
+            ],
+        ];
+    }
+
+    /**
+     * What every service above includes. A strip rather than a seventh card:
+     * "complete project execution" describes how the other six are delivered,
+     * and giving it a card of its own would dilute the two genuinely new ones.
+     *
+     * @return list<string>
+     */
+    public function getExecutionSteps(): array
+    {
+        return [
+            'Site survey and system design',
+            'Subsidy and net-metering paperwork',
+            'Supply, installation and commissioning',
+            'Service and support afterwards',
         ];
     }
 
@@ -119,6 +174,131 @@ final class Page extends AbstractBlock
             ['title' => 'Local install and support',
              'text'  => 'Based in Satara. When something needs attention, we are half an hour away.'],
         ];
+    }
+
+    /**
+     * The towns with their own page, keyed by the pages.php identifier.
+     *
+     * `town` is also the substring matched against gallery_item.location, so it
+     * has to be the word the family actually types when adding a photo. Keep it
+     * to the bare town name for that reason.
+     *
+     * @return array<string, array{town: string, headline: string, intro: string, note: string}>
+     */
+    public function getServiceAreas(): array
+    {
+        return [
+            'solar-in-satara' => [
+                'town'     => 'Satara',
+                'headline' => 'Rooftop solar in Satara city',
+                'intro'    => 'This is where we are. Our office, our team and most of our '
+                            . 'installations are in Satara city, which means a site visit is '
+                            . 'usually a matter of days and a service call is a short drive '
+                            . 'rather than a scheduled trip.',
+                'note'     => 'RCC, tiled and metal-sheet roofs across Zunjar Colony, Shahupuri, '
+                            . 'Kesarkar Peth, Karanje Peth and the rest of the city.',
+            ],
+            'solar-in-karad' => [
+                'town'     => 'Karad',
+                'headline' => 'Rooftop solar in Karad',
+                'intro'    => 'Karad is about an hour from our office, and we work there '
+                            . 'regularly. Homes, housing societies and commercial roofs, with '
+                            . 'the same free survey and the same written estimate before '
+                            . 'anything is ordered.',
+                'note'     => 'If you are in a village around Karad rather than in the town '
+                            . 'itself, ask anyway. We usually can.',
+            ],
+            'solar-in-wai' => [
+                'town'     => 'Wai',
+                'headline' => 'Rooftop solar in Wai',
+                'intro'    => 'Wai sits close enough to Satara that we treat it as home ground. '
+                            . 'Rooftop panels, solar water heaters and the electrical work that '
+                            . 'has to be right before either is safe to connect.',
+                'note'     => 'Shading from surrounding hills matters more here than in the '
+                            . 'city, which is exactly why we survey before we quote.',
+            ],
+            'solar-in-phaltan' => [
+                'town'     => 'Phaltan',
+                'headline' => 'Rooftop solar in Phaltan',
+                'intro'    => 'Phaltan taluka is agricultural as much as residential, so this '
+                            . 'is where solar pumps come up as often as rooftop panels. We do '
+                            . 'both, and we will tell you which one actually saves you more.',
+                'note'     => 'Solar pumps, rooftop systems and street lighting for farms, '
+                            . 'homes and small businesses.',
+            ],
+        ];
+    }
+
+    /**
+     * The town this page is about, or null if the identifier is not an area
+     * page. The template treats null as "nothing to render" rather than
+     * throwing, so a mistyped pages.php entry degrades to a thin page instead
+     * of a 500.
+     *
+     * @return array{town: string, headline: string, intro: string, note: string}|null
+     */
+    public function getServiceArea(): ?array
+    {
+        return $this->getServiceAreas()[$this->getIdentifier()] ?? null;
+    }
+
+    /**
+     * The three founders, for the About page.
+     *
+     * Hardcoded here rather than given a table because there are three of them
+     * and they change roughly once a decade -- a CRUD screen the family would
+     * open twice would cost more to maintain than it saves.
+     *
+     * `photo` is a path under pub/images/. The template checks whether the file
+     * is actually there and falls back to a monogram, so this array is correct
+     * whether or not the photographs have been supplied yet.
+     *
+     * @return list<array{name: string, role: string, credential: string, photo: string}>
+     */
+    public function getTeam(): array
+    {
+        return [
+            ['name'       => 'Udyasingh Naryanrao Pawar',
+             'role'       => 'Founder, Eco Life Group',
+             'credential' => 'B.E. Chemical Engineering. Twenty years in business, and the person '
+                           . 'who laid the foundation the rest of this is built on.',
+             'photo'      => 'images/team/udyasingh.jpg'],
+            ['name'       => 'Sahil Udyasingh Pawar',
+             'role'       => 'Founder, Eco Life Green Infra LLP',
+             'credential' => 'M.A. Psychology. Six years in solar. Looks after customer '
+                           . 'relationships and project execution, so he is usually the one on '
+                           . 'your roof.',
+             'photo'      => 'images/team/sahil.jpg'],
+            ['name'       => 'Piyush Udyasingh Pawar',
+             'role'       => 'Co-Founder, Eco Life Green Infra LLP',
+             'credential' => 'B.Com, Business Administration and Finance. Eight years across '
+                           . 'solar and other sectors. Handles business management and financial '
+                           . 'planning.',
+             'photo'      => 'images/team/piyush.jpg'],
+        ];
+    }
+
+    /**
+     * True when the photograph for a team member is actually on disk.
+     *
+     * getStaticUrl() deliberately returns a URL for a missing file, because a
+     * 404 on a stylesheet is easier to debug than a silently omitted link. That
+     * is the wrong trade for a face: a broken-image icon where a founder should
+     * be is worse than no photograph at all.
+     */
+    public function hasStaticFile(string $file): bool
+    {
+        return is_file(BP . '/pub/' . ltrim($file, '/'));
+    }
+
+    /** Initials for the monogram shown until a photograph exists. */
+    public function getInitials(string $name): string
+    {
+        $parts = preg_split('/\s+/', trim($name)) ?: [];
+        $first = $parts[0] ?? '';
+        $last  = count($parts) > 1 ? $parts[count($parts) - 1] : '';
+
+        return mb_strtoupper(mb_substr($first, 0, 1) . mb_substr($last, 0, 1));
     }
 
     public function getWhatsappLink(): string

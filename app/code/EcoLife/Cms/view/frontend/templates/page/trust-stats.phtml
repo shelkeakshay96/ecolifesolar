@@ -1,0 +1,70 @@
+<?php
+/**
+ * The trust band. Shared by the home page and the About page, pulled from both
+ * with renderChild() for the same reason page/service-icon.phtml is shared: two
+ * copies of this markup would diverge the first time someone adjusted the rule
+ * under a figure, and the difference would only ever be visible by loading both
+ * pages side by side.
+ *
+ * The figures count up via [data-count-to] in pub/js/app.js. That code assigns
+ * el.textContent, which destroys any child element, so the suffix has to travel
+ * in data-count-suffix rather than in a <span>. The server renders the finished,
+ * formatted string as the element's own text, so the band is complete and
+ * correct with JavaScript off, before the observer fires, and under
+ * prefers-reduced-motion.
+ *
+ * counting-on-dark sets --counting-base so the shimmer fades back to pearl
+ * rather than to pine-800, which on this background is a hole.
+ *
+ * Not a <dl>: these are not term/definition pairs, and getting the number above
+ * its label inside one would need <dt> first in the DOM and a flex-col-reverse
+ * to undo it. A list of four is what a screen reader should hear.
+ *
+ * @var \EcoLife\Cms\Block\Stats $block
+ */
+$figures = $block->getFigures();
+
+if ($figures === []) {
+    return;
+}
+?>
+<section class="counting-on-dark border-y border-gold-300/25 bg-pine-900">
+    <div class="section-shell py-16 lg:py-20">
+        <ul role="list" class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4" data-reveal-stagger="90">
+            <?php foreach ($figures as $figure): ?>
+                <li class="reveal text-center sm:text-left">
+                    <p class="font-display text-[clamp(2.4rem,4.4vw,3.3rem)] font-semibold leading-none text-pearl"
+                       data-count-to="<?= $block->escapeHtmlAttr((string) $figure['value']) ?>"
+                       data-count-suffix="<?= $block->escapeHtmlAttr($figure['suffix']) ?>">
+                        <?= $block->escapeHtml($figure['display']) ?>
+                    </p>
+
+                    <?php /* gold-rule is left-aligned by default; mx-auto centres it on the
+                             narrow layout, where the whole tile is centred too. */ ?>
+                    <div class="gold-rule mx-auto sm:mx-0"></div>
+
+                    <p class="font-mono text-[.72rem] font-semibold uppercase tracking-[.14em] text-gold-300">
+                        <?= $block->escapeHtml($figure['label']) ?>
+                    </p>
+                    <p class="mt-1.5 text-[.85rem] leading-relaxed text-pine-100/75">
+                        <?= $block->escapeHtml($figure['note']) ?>
+                    </p>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
+        <?php /* Credentials, on the same band rather than in a strip of their own.
+                 They are the same kind of claim as the numbers -- something a
+                 visitor could go and check -- and they read as filler when given
+                 a whole section to themselves. */ ?>
+        <div class="reveal mt-12 flex flex-wrap items-center justify-center gap-x-3 gap-y-3 border-t border-gold-300/20 pt-8
+                    sm:justify-start">
+            <?php foreach ($block->getCredentials() as $index => $credential): ?>
+                <?php if ($index > 0): ?>
+                    <span class="hidden text-gold-300/40 sm:inline" aria-hidden="true">&middot;</span>
+                <?php endif; ?>
+                <span class="badge"><?= $block->escapeHtml($credential) ?></span>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>

@@ -196,6 +196,46 @@ abstract class AbstractBlock
         return Settings::get($path, $default);
     }
 
+    /**
+     * The contact numbers, split into one entry per number.
+     *
+     * The setting holds a comma-separated list, because a business that answers
+     * on an office line and a mobile has to be able to publish both. Each entry
+     * gets its own tel: link so tapping one on a phone dials that number and not
+     * a concatenation of all of them.
+     *
+     * `display` is exactly what was typed, spacing and all -- an Indian reader
+     * scans "+91 98765 43210" faster than the unspaced digits. `dial` is the
+     * href: digits only, keeping a leading + so international dialling survives.
+     * Stripping to [^0-9+] matters because a number written with hyphens or
+     * brackets produced a tel: URI that some Android dialers refuse outright,
+     * which the old preg_replace('/\s+/') left in place.
+     *
+     * @return list<array{display: string, dial: string}>
+     */
+    public function getContactNumbers(string $path = 'general/contact/phone'): array
+    {
+        $numbers = [];
+
+        foreach (explode(',', $this->getSetting($path)) as $raw) {
+            $display = trim($raw);
+
+            if ($display === '') {
+                continue;
+            }
+
+            $dial = preg_replace('/(?!^\+)[^0-9]/', '', $display) ?? '';
+
+            if ($dial === '' || $dial === '+') {
+                continue;
+            }
+
+            $numbers[] = ['display' => $display, 'dial' => $dial];
+        }
+
+        return $numbers;
+    }
+
     public function isAdminArea(): bool
     {
         return $this->context->getArea()->isAdmin();

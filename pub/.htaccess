@@ -21,11 +21,15 @@
     # from "/" (see Core/App/Url.php), so it must be served from a domain
     # root, not a subdirectory.
 
-    # Force HTTPS. The certificate must exist before this is switched on --
-    # comment this block out until it does, or the site becomes unreachable.
-    RewriteCond %{HTTPS} !=on
-    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # Force HTTPS. DELIBERATELY OFF UNTIL THE CERTIFICATE IS LIVE.
+    #
+    # Redirecting to https:// before a certificate exists does not degrade to
+    # http -- the browser refuses the connection and the site is simply down,
+    # including the admin panel needed to fix it. Load the site over https
+    # once and see a padlock, THEN uncomment these three lines.
+    # RewriteCond %{HTTPS} !=on
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Real files and directories are served directly: CSS, JS, fonts, and
     # everything under media/.
@@ -71,7 +75,6 @@
 <IfModule mod_headers.c>
     Header unset X-Powered-By
 </IfModule>
-ServerSignature Off
 
 # ---------------------------------------------------------------- static assets
 
