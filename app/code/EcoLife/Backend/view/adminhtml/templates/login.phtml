@@ -21,16 +21,19 @@
         </div>
 
         <div class="mt-4">
-            <label for="password" class="form-label">Password</label>
+            <div class="flex items-baseline justify-between gap-3">
+                <label for="password" class="form-label">Password</label>
+                <a href="<?= $block->escapeUrl($block->getForgotUrl()) ?>"
+                   class="text-xs font-medium text-slate-500 hover:text-slate-800">Forgot password?</a>
+            </div>
             <input id="password" name="password" type="password" class="form-input" required
                    autocomplete="current-password">
         </div>
 
+        <?php /* No hint here about how accounts are created. This page is public,
+                 and naming the CLI command told an attacker the shape of the system
+                 without telling a legitimate user anything they did not already know
+                 -- the two people with accounts were both handed theirs. */ ?>
         <button type="submit" class="btn-primary mt-6 w-full">Sign in</button>
-
-        <p class="mt-4 text-center text-xs text-slate-400">
-            Accounts are created from the command line with
-            <span class="font-mono">bin/ecolife admin:user:create</span>.
-        </p>
     </form>
 </section>

@@ -23,17 +23,46 @@ use RuntimeException;
  */
 final class Transport
 {
+    /**
+     * Why the last send failed, for a caller that shows it to a human.
+     *
+     * The application never reads this -- a lead form that told the visitor
+     * about an SMTP handshake would be leaking infrastructure at them. It
+     * exists for bin/ecolife mail:test, where the reason IS the output.
+     */
+    private string $lastError = '';
+
+    /**
+     * @param string|null $forceTransport Overrides mail.transport. Only
+     *        mail:test passes this: that command exists to prove a real relay
+     *        works, and honouring a 'file' setting would let it report success
+     *        while sending nothing, which is worse than having no test at all.
+     */
+    public function __construct(private readonly ?string $forceTransport = null)
+    {
+    }
+
+    public function getLastError(): string
+    {
+        return $this->lastError;
+    }
+
     /** @param list<string> $to */
     public function send(array $to, string $subject, string $htmlBody, ?string $replyTo = null): bool
     {
+        $this->lastError = '';
+
         $to = array_values(array_filter(array_map('trim', $to)));
 
         if ($to === []) {
+            $this->lastError = 'No recipients.';
             Logger::warning('Mail not sent: no recipients configured');
             return false;
         }
 
-        return match ((string) Config::env('mail.transport', 'file')) {
+        $transport = $this->forceTransport ?? (string) Config::env('mail.transport', 'file');
+
+        return match ($transport) {
             'smtp'  => $this->sendSmtp($to, $subject, $htmlBody, $replyTo),
             default => $this->writeFile($to, $subject, $htmlBody, $replyTo),
         };
@@ -116,9 +145,11 @@ final class Transport
 
             return true;
         } catch (PHPMailerException $e) {
+            $this->lastError = $e->getMessage();
             Logger::error('SMTP send failed: ' . $e->getMessage());
             return false;
         } catch (RuntimeException $e) {
+            $this->lastError = $e->getMessage();
             Logger::error('SMTP configuration error: ' . $e->getMessage());
             return false;
         }

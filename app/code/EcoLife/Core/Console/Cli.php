@@ -33,7 +33,7 @@ final class Cli
         'route:list'        => 'Show every route in both areas',
         'assets:build'      => 'Compile Tailwind into pub/css/ecolife.css (--watch for development)',
         'lint:templates'    => 'Fail on any unescaped output in a .phtml template',
-        'mail:test'         => 'Send a test message through the configured transport',
+        'mail:test'         => 'Send a real test message over SMTP (--file to write one instead)',
     ];
 
     /** @param list<string> $argv */
@@ -582,6 +582,17 @@ final class Cli
      *
      * @param list<string> $args
      */
+    /**
+     * Sends a real message over SMTP, whatever mail.transport happens to say.
+     *
+     * It used to honour that setting, which meant that on any machine left at
+     * the default it wrote a .eml, printed a success line and proved precisely
+     * nothing -- the one outcome a command called mail:test must never produce.
+     * The point of running it is to find out whether a relay will accept a
+     * message, and that question has no answer on the file transport.
+     *
+     * --file is still there for exercising the file path deliberately.
+     */
     private function mailTest(array $args): int
     {
         $transport = '\\EcoLife\\Mail\\Model\\Transport';
@@ -591,17 +602,55 @@ final class Cli
             return 1;
         }
 
-        $recipient = $args[0] ?? '';
+        $recipient = '';
+        foreach ($args as $arg) {
+            if (!str_starts_with($arg, '--')) {
+                $recipient = $arg;
+                break;
+            }
+        }
 
         if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
-            self::error('Usage: bin/ecolife mail:test you@example.com');
+            self::error('Usage: bin/ecolife mail:test you@example.com [--file]');
             return 1;
         }
 
-        $mode = (string) Config::env('mail.transport', 'file');
-        self::heading("Sending a test message via the '{$mode}' transport");
+        $useFile = in_array('--file', $args, true);
 
-        $sent = (new $transport())->send(
+        if ($useFile) {
+            self::heading('Writing a test message to var/log/mail/');
+        } else {
+            self::heading('Sending a real test message over SMTP');
+
+            // Named, not generic. "SMTP configuration error" sends someone
+            // reading PHPMailer's source; "mail.smtp.host is not set" sends
+            // them to the one line in env.php that is actually wrong.
+            $missing = [];
+            foreach (['mail.smtp.host', 'mail.smtp.user', 'mail.smtp.password', 'mail.from.address'] as $key) {
+                if ((string) Config::env($key, '') === '') {
+                    $missing[] = $key;
+                }
+            }
+
+            if ($missing !== []) {
+                self::error('SMTP is not configured. Missing in app/etc/env.php: ' . implode(', ', $missing));
+                echo "  Set them, then run this again. cPanel > Email Accounts > Connect Devices\n"
+                   . "  prints the host, port and encryption for your server.\n";
+                return 1;
+            }
+
+            printf(
+                "  host %s:%s  encryption %s  from %s\n",
+                (string) Config::env('mail.smtp.host'),
+                (string) Config::env('mail.smtp.port', '587'),
+                (string) Config::env('mail.smtp.encryption', 'tls'),
+                (string) Config::env('mail.from.address')
+            );
+        }
+
+        $mailer = new $transport($useFile ? 'file' : 'smtp');
+
+        $sent = $mailer->send(
             [$recipient],
             'EcoLifeSolar test message',
             '<p>If you are reading this, the mail transport works.</p>'
@@ -609,13 +658,19 @@ final class Cli
         );
 
         if (!$sent) {
-            self::error('Transport reported failure. See var/log/exception.log.');
+            self::error('Not sent: ' . ($mailer->getLastError() ?: 'no reason reported'));
+            echo "  Full detail in var/log/system.log.\n";
             return 1;
         }
 
-        self::ok($mode === 'file'
-            ? 'Written to var/log/mail/ -- nothing left this machine.'
-            : "Handed to the SMTP relay for {$recipient}.");
+        if ($useFile) {
+            self::ok('Written to var/log/mail/ -- nothing left this machine.');
+            return 0;
+        }
+
+        self::ok("Accepted by the relay for {$recipient}.");
+        echo "  The relay took it. That is not the same as it arriving -- check the inbox,\n"
+           . "  and the spam folder, before calling this done.\n";
 
         return 0;
     }

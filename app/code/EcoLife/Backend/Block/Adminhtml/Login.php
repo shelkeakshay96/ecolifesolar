@@ -12,4 +12,9 @@ final class Login extends AbstractBlock
     {
         return $this->getUrl('auth/login');
     }
+
+    public function getForgotUrl(): string
+    {
+        return $this->getUrl('auth/forgot');
+    }
 }
