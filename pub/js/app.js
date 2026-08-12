@@ -253,14 +253,27 @@
      */
     motion.leaves = function () {
         var zone = document.querySelector('[data-leaf-zone]');
-        if (!zone || !finePointer() || !('IntersectionObserver' in window)) { return; }
+
+        /* No finePointer() gate here, deliberately. magnetic and pointerHalo
+           need one because they follow a cursor and mean nothing without it;
+           leaves are driven by scrolling, which every device does. Gating them
+           on pointer type was a copy-paste from those two, and it switched the
+           effect off for every phone -- which is most of this site's traffic. */
+        if (!zone || !('IntersectionObserver' in window)) { return; }
 
         var SHAPES = [
             'M12 0C4 4 0 12 4 22c3 7 11 9 17 6-2-10-2-19-9-28Z',
             'M0 12C4 4 12 0 22 4c7 3 9 11 6 17-10-2-19-2-28-9Z'
         ];
         var COLOURS = ['#8BC34A', '#2E7D32', '#F0A500'];
-        var MAX = 12;
+
+        /* Read per spawn rather than once, so rotating a phone does not leave a
+           stale figure behind. Half as many on a small screen: twelve elements
+           animating over a 360px viewport is both busier to look at and more
+           work for the low-end Androids a lot of this audience is on. */
+        function maxLeaves() {
+            return window.innerWidth < 640 ? 6 : 12;
+        }
 
         var inZone = false;
         var lastY = window.scrollY;
@@ -272,7 +285,7 @@
 
         function spawn() {
             if (document.hidden || prefersReducedMotion()) { return; }
-            if (document.querySelectorAll('.leaf-fall').length >= MAX) { return; }
+            if (document.querySelectorAll('.leaf-fall').length >= maxLeaves()) { return; }
 
             var size = 14 + Math.random() * 12;
             var spin = Math.random() * 360;

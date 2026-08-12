@@ -1,0 +1,50 @@
+<?php
+/**
+ * "Choose a new password."
+ *
+ * Only ever reached with a token the controller has already validated, so this
+ * template does no checking of its own -- it carries the token through in a
+ * hidden field and the controller checks it again on the POST, because a form
+ * left open for an hour is a form whose token may have expired meanwhile.
+ *
+ * The token stays out of the visible form. It is in the URL either way, which
+ * is unavoidable for a link in an email, but there is no reason to also print
+ * it on screen where a shoulder or a screenshot picks it up.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+$token = (string) $block->getData('token', '');
+?>
+<section class="mx-auto flex max-w-md flex-col justify-center px-4 py-16 sm:py-24">
+    <div class="text-center">
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Choose a new password</h1>
+        <p class="mt-1 text-sm text-slate-500">
+            Twelve characters or more. A short sentence you will remember beats a short
+            jumble you will not.
+        </p>
+    </div>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getUrl('auth/reset')) ?>" class="card mt-8">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+        <input type="hidden" name="token" value="<?= $block->escapeHtmlAttr($token) ?>">
+
+        <div>
+            <label for="password" class="form-label">New password</label>
+            <input id="password" name="password" type="password" class="form-input" required
+                   autocomplete="new-password" autofocus minlength="12">
+        </div>
+
+        <div class="mt-4">
+            <label for="password_confirm" class="form-label">Type it again</label>
+            <input id="password_confirm" name="password_confirm" type="password" class="form-input" required
+                   autocomplete="new-password" minlength="12">
+        </div>
+
+        <button type="submit" class="btn-primary mt-6 w-full">Save new password</button>
+    </form>
+
+    <p class="mt-6 text-center text-sm">
+        <a href="<?= $block->escapeUrl($block->getUrl('auth/login')) ?>"
+           class="font-medium text-slate-500 hover:text-slate-800">Back to sign in</a>
+    </p>
+</section>

@@ -1,0 +1,40 @@
+<?php
+/**
+ * "Send me a reset link."
+ *
+ * Rendered with a bare Template block, so the URLs are built here through
+ * getUrl() rather than through a block class that would exist only to hold two
+ * one-line methods.
+ *
+ * @var \EcoLife\Core\View\Element\Template $block
+ */
+?>
+<section class="mx-auto flex max-w-md flex-col justify-center px-4 py-16 sm:py-24">
+    <div class="text-center">
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Reset your password</h1>
+        <p class="mt-1 text-sm text-slate-500">
+            Enter the email address on your admin account and we will send you a link.
+        </p>
+    </div>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getUrl('auth/forgot')) ?>" class="card mt-8">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+        <div>
+            <label for="email" class="form-label">Email address</label>
+            <input id="email" name="email" type="email" class="form-input" required
+                   autocomplete="email" autofocus maxlength="190">
+        </div>
+
+        <button type="submit" class="btn-primary mt-6 w-full">Send reset link</button>
+
+        <p class="mt-4 text-center text-xs text-slate-400">
+            The link works once and stops working after an hour.
+        </p>
+    </form>
+
+    <p class="mt-6 text-center text-sm">
+        <a href="<?= $block->escapeUrl($block->getUrl('auth/login')) ?>"
+           class="font-medium text-slate-500 hover:text-slate-800">Back to sign in</a>
+    </p>
+</section>

@@ -64,6 +64,29 @@ final class AdminUser extends AbstractModel
         return $this->load($username, 'username');
     }
 
+    /** email is UNIQUE in the schema, so this is as single-valued as the id. */
+    public function loadByEmail(string $email): static
+    {
+        return $this->load(mb_strtolower(trim($email)), 'email');
+    }
+
+    /**
+     * Clear the failed-login lockout.
+     *
+     * Called after a successful password reset. Someone who has just proved
+     * control of the mailbox has answered the question the lockout was asking,
+     * and leaving them locked out for another quarter of an hour with a
+     * password that now works is the sort of thing that gets a site abandoned.
+     */
+    public function clearLockout(): static
+    {
+        return $this->addData([
+            'failures_num'  => 0,
+            'first_failure' => null,
+            'lock_expires'  => null,
+        ]);
+    }
+
     public function verifyPassword(string $password): bool
     {
         $hash = (string) $this->getData('password_hash');
