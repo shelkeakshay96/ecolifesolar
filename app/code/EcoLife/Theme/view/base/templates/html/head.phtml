@@ -3,6 +3,11 @@
  * Document head. Shared by both areas -- lives in base/ rather than frontend/,
  * so the admin panel gets the same stylesheet and metadata handling for free.
  *
+ * The search-engine and social tags below are all conditional on data the admin
+ * layout simply never passes. That is the area check: rather than asking which
+ * area this is, the template renders what it was given, and layout/admin.phtml
+ * gives it a title and nothing else.
+ *
  * @var \EcoLife\Core\View\Element\Template $block
  */
 ?>
@@ -16,6 +21,44 @@
 
 <meta name="robots" content="<?= $block->escapeHtmlAttr($block->getData('robots', 'index,follow')) ?>">
 <meta name="theme-color" content="#f59e0b">
+
+<?php /*
+    The canonical URL. Without it every address that returns this same page --
+    an old link with a tracking parameter glued on, a trailing slash, the http
+    version before the redirect -- is a separate page as far as a crawler is
+    concerned, and whatever authority the page has earned is divided between
+    them instead of accumulating on one.
+*/ ?>
+<?php if ($canonical = (string) $block->getData('canonical', '')): ?>
+<link rel="canonical" href="<?= $block->escapeUrl($canonical) ?>">
+<?php endif; ?>
+
+<?php if ($canonical !== ''): ?>
+<?php /*
+    Open Graph and Twitter. These do not affect ranking. They decide what a
+    WhatsApp forward looks like -- and in this market a WhatsApp forward is how
+    most of this site will actually be shared, so a blank grey card is a real
+    cost even though Google never sees it.
+*/ ?>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="<?= $block->escapeHtmlAttr($block->getSetting('general/business/name', 'Eco Life Solar')) ?>">
+<meta property="og:locale" content="en_IN">
+<meta property="og:title" content="<?= $block->escapeHtmlAttr($block->getData('title', 'EcoLifeSolar')) ?>">
+<meta property="og:url" content="<?= $block->escapeUrl($canonical) ?>">
+<?php if ($description !== ''): ?>
+<meta property="og:description" content="<?= $block->escapeHtmlAttr($description) ?>">
+<?php endif; ?>
+<?php if ($social = (string) $block->getData('social_image', '')): ?>
+<meta property="og:image" content="<?= $block->escapeUrl($social) ?>">
+<meta property="og:image:alt" content="A rooftop solar installation by Eco Life Solar in Satara">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="<?= $block->escapeUrl($social) ?>">
+<?php endif; ?>
+<meta name="twitter:title" content="<?= $block->escapeHtmlAttr($block->getData('title', 'EcoLifeSolar')) ?>">
+<?php if ($description !== ''): ?>
+<meta name="twitter:description" content="<?= $block->escapeHtmlAttr($description) ?>">
+<?php endif; ?>
+<?php endif; ?>
 
 <link rel="stylesheet" href="<?= $block->escapeUrl($block->getStaticUrl('css/ecolife.css')) ?>">
 <link rel="icon" href="<?= $block->escapeUrl($block->getStaticUrl('images/favicon.svg')) ?>" type="image/svg+xml">

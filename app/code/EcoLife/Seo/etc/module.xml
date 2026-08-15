@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+    Everything a search engine reads and no human ever sees: robots.txt, the
+    sitemap, and the JSON-LD graph describing the business.
+
+    It owns no database table. Every fact it publishes is already stored
+    somewhere else, in core_config or in the page whitelist, and this module
+    only restates it in the shapes crawlers expect. That is deliberate: an
+    address kept in two places is an address that will disagree with itself,
+    and for local search a business whose details disagree across the web ranks
+    below one whose details agree.
+
+    It depends on Cms because the sitemap is generated from the same page
+    whitelist that serves the pages, so a page cannot exist without being
+    listed, or be listed without existing.
+-->
+<module name="EcoLife_Seo" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+        <module name="EcoLife_Theme"/>
+        <module name="EcoLife_Cms"/>
+    </sequence>
+</module>

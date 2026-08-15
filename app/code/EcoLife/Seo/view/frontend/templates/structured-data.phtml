@@ -1,0 +1,16 @@
+<?php
+/**
+ * The JSON-LD block. Invisible on the page and read by nothing but crawlers.
+ *
+ * The nonce attribute is not optional here. Content-Security-Policy governs
+ * every <script> element regardless of its type, so under "script-src 'self'"
+ * this block is discarded before a crawler ever parses it -- and nothing about
+ * the rendered page looks wrong when that happens, which is what makes it worth
+ * a comment. See Core\App\Csp.
+ *
+ * @var \EcoLife\Seo\Block\StructuredData $block
+ */
+?>
+<script type="application/ld+json" nonce="<?= $block->escapeHtmlAttr($block->getNonce()) ?>">
+<?= $block->escapeJsonLd($block->getGraph()) ?>
+</script>
