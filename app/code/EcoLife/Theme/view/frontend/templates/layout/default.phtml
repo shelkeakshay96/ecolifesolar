@@ -13,6 +13,15 @@ $whatsapp = preg_replace('/\D+/', '', $block->getSetting('general/contact/whatsa
         'title'            => $block->getTitle(),
         'meta_description' => $block->getMetaDescription(),
         'robots'           => $block->getRobots(),
+        'canonical'        => $block->getCanonicalUrl(),
+        'social_image'     => $block->getSocialImage(),
+    ]) ?>
+
+    <?php /* JSON-LD. Frontend only -- there is nothing about the admin panel
+             worth describing to a search engine, and it is noindex anyway. */ ?>
+    <?= $block->renderChild(\EcoLife\Seo\Block\StructuredData::class, 'EcoLife_Seo::structured-data.phtml', [
+        'page_title'       => $block->getTitle(),
+        'page_description' => $block->getMetaDescription(),
     ]) ?>
 </head>
 <body class="flex min-h-full flex-col bg-pearl font-sans text-ink antialiased <?= $block->escapeHtmlAttr($block->getBodyClass()) ?>">

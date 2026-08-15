@@ -26,6 +26,8 @@ final class Page implements ResultInterface
     private string $metaDescription = '';
     private string $bodyClass = '';
     private string $robots = 'index,follow';
+    private string $canonicalUrl = '';
+    private string $socialImage = '';
     private int $statusCode = 200;
 
     private ?AbstractBlock $content = null;
@@ -73,9 +75,64 @@ final class Page implements ResultInterface
         return $this;
     }
 
+    /**
+     * The admin panel is never indexable, whatever a controller asked for.
+     *
+     * robots.txt already disallows /admin, but robots.txt is a crawl
+     * instruction, not an index instruction: a URL somebody links to can still
+     * be listed from the link alone, without ever being fetched. The meta tag
+     * is what actually keeps it out, and deciding it here rather than in each
+     * of the twenty-odd admin controllers means a new one cannot forget.
+     */
     public function getRobots(): string
     {
-        return $this->robots;
+        return $this->context->getArea()->isAdmin() ? 'noindex,nofollow' : $this->robots;
+    }
+
+    /**
+     * The one address this page should be indexed under.
+     *
+     * Left unset, it is the current path made absolute -- which is right for
+     * every page the site currently has, because each one answers on exactly
+     * one URL. Set it explicitly when that stops being true: a filtered or
+     * paginated listing needs to point at the unfiltered page rather than
+     * competing with it.
+     */
+    public function setCanonicalUrl(string $url): self
+    {
+        $this->canonicalUrl = $url;
+        return $this;
+    }
+
+    public function getCanonicalUrl(): string
+    {
+        if ($this->canonicalUrl !== '') {
+            return $this->canonicalUrl;
+        }
+
+        $url  = $this->context->getUrl();
+        $path = $this->context->getRequest()->getPathInfo();
+
+        // Query strings are dropped deliberately. Nothing on the public site
+        // varies its content by one, so ?fbclid=... arriving from a shared link
+        // must not become a second indexable address for the same page.
+        return rtrim($url->getBaseUrl(), '/') . ($path === '' ? '/' : $path);
+    }
+
+    /** Absolute URL of the image social platforms should use for this page. */
+    public function setSocialImage(string $url): self
+    {
+        $this->socialImage = $url;
+        return $this;
+    }
+
+    public function getSocialImage(): string
+    {
+        $url = $this->context->getUrl();
+
+        return $this->socialImage !== ''
+            ? $this->socialImage
+            : rtrim($url->getBaseUrl(), '/') . $url->getStaticUrl('images/panels.jpg');
     }
 
     public function setHttpResponseCode(int $code): self

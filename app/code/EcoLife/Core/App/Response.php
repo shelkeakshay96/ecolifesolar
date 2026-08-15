@@ -121,7 +121,12 @@ final class Response
                 "default-src 'self'",
                 "img-src 'self' data:",
                 "style-src 'self' 'unsafe-inline'",
-                "script-src 'self'",
+                // The nonce is here for JSON-LD, which has to be an inline
+                // <script> to be read at all. See Core\App\Csp. Adding a nonce
+                // does not weaken 'self': both sources apply, so external
+                // scripts are still confined to this origin, and an injected
+                // inline script still has no way to guess the value.
+                "script-src 'self' 'nonce-" . Csp::value() . "'",
                 "form-action 'self'",
                 "frame-ancestors 'self'",
                 "base-uri 'self'",

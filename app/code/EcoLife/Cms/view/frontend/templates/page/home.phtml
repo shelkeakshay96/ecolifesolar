@@ -30,8 +30,17 @@ $featured = array_shift($services);
                 <span class="opacity-60">/00</span> <?= $block->escapeHtml($block->getSetting('general/business/name', 'Eco Life')) ?> · Rooftop Solar
             </p>
 
+            <?php /*
+                The h1 carries the town on purpose. "Clean power, rooted in
+                nature" was the whole heading here, and it is a good line, but
+                it is the single strongest on-page signal on the site's
+                strongest page and it named neither the service nor the place --
+                so the page asserted nothing that anyone searching for a solar
+                installer in Satara would ever type. The slogan is kept as the
+                accent clause, which is where it reads best anyway.
+            */ ?>
             <h1 class="mt-4 text-pearl text-[clamp(2.2rem,4.4vw,3.5rem)] leading-[1.08]" data-word-reveal>
-                Clean power, <em class="italic text-gold-300">rooted in nature.</em>
+                Rooftop solar in Satara, <em class="italic text-gold-300">rooted in nature.</em>
             </h1>
 
             <div class="gold-rule"></div>

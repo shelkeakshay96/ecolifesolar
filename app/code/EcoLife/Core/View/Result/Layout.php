@@ -39,6 +39,16 @@ final class Layout extends AbstractBlock
         return $this->getPage()->getRobots();
     }
 
+    public function getCanonicalUrl(): string
+    {
+        return $this->getPage()->getCanonicalUrl();
+    }
+
+    public function getSocialImage(): string
+    {
+        return $this->getPage()->getSocialImage();
+    }
+
     public function getContentHtml(): string
     {
         return $this->getPage()->getContentHtml();
