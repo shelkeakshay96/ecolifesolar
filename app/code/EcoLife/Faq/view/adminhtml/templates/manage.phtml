@@ -1,0 +1,210 @@
+<?php
+/**
+ * FAQ management: the list and the add form on one screen, mirroring
+ * EcoLife_Testimonial::manage.phtml.
+ *
+ * Each row carries a full edit form inside a <details>, because the realistic
+ * workflow here is correcting a wording or a sort order rather than deleting
+ * and retyping a paragraph. <details> rather than a script because it needs no
+ * JavaScript at all, which under script-src 'self' is one fewer thing that can
+ * silently fail to load.
+ *
+ * The edit form shows getRawAnswer(), tokens and all. Showing the substituted
+ * text would mean an admin who opens a row and saves it silently bakes today's
+ * price into the database as literal text, and the answer would stop tracking
+ * the calculator from then on -- a data-loss bug that looks like a no-op.
+ *
+ * @var \EcoLife\Faq\Block\Adminhtml\Manage $block
+ */
+$faqs = $block->getFaqs();
+?>
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900">FAQ</h1>
+            <p class="mt-1 text-sm text-slate-500">
+                The questions on the public FAQ page. Lower sort order appears first, and hidden
+                questions stay off the site without being deleted.
+            </p>
+        </div>
+        <a href="<?= $block->escapeUrl($block->getPageUrl()) ?>" target="_blank" rel="noopener"
+           class="text-sm font-medium text-slate-500 hover:text-slate-900">View the page &rarr;</a>
+    </div>
+
+    <div class="card mt-6 border-l-4 border-l-amber-400">
+        <h2 class="text-sm font-semibold text-slate-900">Writing answers</h2>
+        <p class="mt-2 text-sm text-slate-600">
+            Search engines read these answers directly, so write them the way you would say them
+            on the phone. Plain sentences, no HTML. If you need to send the reader somewhere,
+            use the link fields rather than pasting an address into the text.
+        </p>
+        <p class="mt-3 text-sm text-slate-600">You can use these in an answer and the live figure is filled in automatically:</p>
+        <ul class="mt-2 space-y-1 text-sm text-slate-600">
+            <?php foreach ($block->getTokens() as $token => $meaning): ?>
+                <li>
+                    <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-800"><?= $block->escapeHtml($token) ?></code>
+                    &mdash; <?= $block->escapeHtml($meaning) ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <p class="mt-2 text-xs text-slate-400">
+            Typing the price as plain text instead means it stops matching the calculator the next
+            time the rate changes.
+        </p>
+    </div>
+
+    <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" class="card mt-6">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+
+        <h2 class="text-base font-semibold text-slate-900">Add a question</h2>
+
+        <div class="mt-4">
+            <label class="form-label" for="f-question">Question</label>
+            <input class="form-input" id="f-question" name="question" type="text" maxlength="255" required
+                   placeholder="e.g. How long does installation take?">
+        </div>
+
+        <div class="mt-4">
+            <label class="form-label" for="f-answer">Answer</label>
+            <textarea class="form-input" id="f-answer" name="answer" rows="5" required
+                      placeholder="Two or three plain sentences."></textarea>
+        </div>
+
+        <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+                <label class="form-label" for="f-link-url">Link address</label>
+                <input class="form-input" id="f-link-url" name="link_url" type="text" maxlength="255"
+                       placeholder="/calculator">
+                <p class="mt-1 text-xs text-slate-400">Optional. A path on this site, starting with /</p>
+            </div>
+            <div>
+                <label class="form-label" for="f-link-label">Link text</label>
+                <input class="form-input" id="f-link-label" name="link_label" type="text" maxlength="120"
+                       placeholder="Estimate your savings">
+                <p class="mt-1 text-xs text-slate-400">Fill both link fields, or neither.</p>
+            </div>
+            <div>
+                <label class="form-label" for="f-sort">Sort order</label>
+                <input class="form-input" id="f-sort" name="sort_order" type="number" step="10" value="0">
+                <p class="mt-1 text-xs text-slate-400">Existing questions go up in tens, so 25 slots between 20 and 30.</p>
+            </div>
+            <div class="flex items-end">
+                <label class="flex items-center gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="is_active" value="1" checked
+                           class="h-4 w-4 rounded border-slate-300">
+                    Show on the website
+                </label>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <button type="submit" class="btn-admin">Add question</button>
+        </div>
+    </form>
+
+    <div class="card mt-8 p-0">
+        <h2 class="border-b border-slate-200 px-6 py-4 text-base font-semibold text-slate-900">
+            <?= $block->escapeHtml((string) count($faqs)) ?> question(s)
+        </h2>
+
+        <?php if ($faqs === []): ?>
+            <p class="px-6 py-10 text-center text-sm text-slate-500">
+                No questions yet. The FAQ page says so until there is at least one.
+            </p>
+        <?php else: ?>
+            <ul class="divide-y divide-slate-100">
+                <?php foreach ($faqs as $faq): ?>
+                    <?php $id = (string) (int) $faq->getId(); ?>
+                    <li class="px-6 py-4">
+                        <div class="flex flex-wrap items-start gap-4">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-slate-900"><?= $block->escapeHtml($faq->getQuestion()) ?></p>
+                                <p class="mt-1 text-sm text-slate-600"><?= $block->escapeHtml($faq->getAnswer()) ?></p>
+                                <?php if ($faq->hasLink()): ?>
+                                    <p class="mt-1 text-xs text-slate-400">
+                                        Link: <?= $block->escapeHtml($faq->getLinkLabel()) ?>
+                                        &rarr; <?= $block->escapeHtml($faq->getLinkUrl()) ?>
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+
+                            <span class="rounded-full px-2 py-0.5 text-xs font-medium <?= $block->escapeHtmlAttr($faq->isActive()
+                                ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500') ?>">
+                                <?= $block->escapeHtml($faq->isActive() ? 'Visible' : 'Hidden') ?>
+                            </span>
+
+                            <span class="text-xs text-slate-400">order <?= $block->escapeHtml((string) $faq->getData('sort_order')) ?></span>
+
+                            <?php /* data-confirm rather than onsubmit: an inline handler is script,
+                                     and script-src 'self' drops it silently. app.js binds this. */ ?>
+                            <form method="post" action="<?= $block->escapeUrl($block->getDeleteUrl($faq)) ?>"
+                                  data-confirm="Remove this question?">
+                                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                                <button type="submit" class="text-sm font-medium text-red-600 hover:text-red-500">Remove</button>
+                            </form>
+                        </div>
+
+                        <details class="mt-3">
+                            <summary class="cursor-pointer text-sm font-medium text-slate-500 hover:text-slate-800">
+                                Edit
+                            </summary>
+
+                            <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+                                  class="mt-3 rounded-lg bg-slate-50 p-4">
+                                <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+                                <input type="hidden" name="faq_id" value="<?= $block->escapeHtmlAttr($id) ?>">
+
+                                <div>
+                                    <label class="form-label" for="e-question-<?= $block->escapeHtmlAttr($id) ?>">Question</label>
+                                    <input class="form-input" id="e-question-<?= $block->escapeHtmlAttr($id) ?>"
+                                           name="question" type="text" maxlength="255" required
+                                           value="<?= $block->escapeHtmlAttr($faq->getQuestion()) ?>">
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="form-label" for="e-answer-<?= $block->escapeHtmlAttr($id) ?>">Answer</label>
+                                    <textarea class="form-input" id="e-answer-<?= $block->escapeHtmlAttr($id) ?>"
+                                              name="answer" rows="5" required><?= $block->escapeHtml($faq->getRawAnswer()) ?></textarea>
+                                </div>
+
+                                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="form-label" for="e-link-url-<?= $block->escapeHtmlAttr($id) ?>">Link address</label>
+                                        <input class="form-input" id="e-link-url-<?= $block->escapeHtmlAttr($id) ?>"
+                                               name="link_url" type="text" maxlength="255"
+                                               value="<?= $block->escapeHtmlAttr($faq->getLinkUrl()) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-link-label-<?= $block->escapeHtmlAttr($id) ?>">Link text</label>
+                                        <input class="form-input" id="e-link-label-<?= $block->escapeHtmlAttr($id) ?>"
+                                               name="link_label" type="text" maxlength="120"
+                                               value="<?= $block->escapeHtmlAttr($faq->getLinkLabel()) ?>">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="e-sort-<?= $block->escapeHtmlAttr($id) ?>">Sort order</label>
+                                        <input class="form-input" id="e-sort-<?= $block->escapeHtmlAttr($id) ?>"
+                                               name="sort_order" type="number" step="10"
+                                               value="<?= $block->escapeHtmlAttr((string) $faq->getData('sort_order')) ?>">
+                                    </div>
+                                    <div class="flex items-end">
+                                        <label class="flex items-center gap-2 text-sm text-slate-700">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                   class="h-4 w-4 rounded border-slate-300"
+                                                   <?= $block->escapeHtmlAttr($faq->isActive() ? 'checked' : '') ?>>
+                                            Show on the website
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mt-5">
+                                    <button type="submit" class="btn-admin">Save changes</button>
+                                </div>
+                            </form>
+                        </details>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+    </div>
+</div>

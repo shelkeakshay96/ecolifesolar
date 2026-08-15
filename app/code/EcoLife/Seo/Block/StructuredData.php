@@ -89,6 +89,10 @@ final class StructuredData extends AbstractBlock
             $nodes[] = $page;
         }
 
+        if ($faq = $this->faqPage()) {
+            $nodes[] = $faq;
+        }
+
         return ['@context' => 'https://schema.org', '@graph' => array_values(array_filter($nodes))];
     }
 
@@ -260,6 +264,73 @@ final class StructuredData extends AbstractBlock
         ];
     }
 
+    /**
+     * FAQPage, on whichever page actually renders an FAQ.
+     *
+     * Driven by the same Cms\Block\Page::getFaqs() the template renders from,
+     * so the markup cannot describe questions the page does not show -- which
+     * is both a Google policy requirement and the failure mode you would never
+     * notice, since the invisible half is the half in the JSON.
+     *
+     * Worth being clear about what this does and does not buy. Since 2023
+     * Google has shown FAQ rich results almost exclusively for government and
+     * health sites, so this will not produce the expandable questions under the
+     * listing for a solar installer. What it does is state unambiguously that
+     * the page answers these specific questions, which helps it be retrieved
+     * for them. The ranking comes from the answers existing, not from the
+     * markup describing them.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function faqPage(): ?array
+    {
+        $blockClass = 'EcoLife\\Faq\\Block\\Faqs';
+
+        // Guarded rather than a declared dependency, as with the gallery in
+        // UrlList: EcoLife_Seo sequences after Cms alone, and switching the FAQ
+        // module off should cost the site a schema node, not every page it
+        // renders on.
+        if (!class_exists($blockClass)) {
+            return null;
+        }
+
+        // The page identifier is the contract, and it is owned by the FAQ
+        // module rather than spelled out again here, so renaming the page is
+        // one edit instead of a hunt for the string.
+        if ($this->identifier() !== $blockClass::PAGE_IDENTIFIER) {
+            return null;
+        }
+
+        // The same rows the template renders, read from the faq table. This is
+        // the property worth protecting through the move off a config file:
+        // markup describing questions the page does not show is both a Google
+        // policy problem and the half nobody would notice was wrong.
+        $faqs = (new $blockClass($this->context))->getFaqs();
+
+        if ($faqs === []) {
+            return null;
+        }
+
+        $entities = [];
+
+        foreach ($faqs as $faq) {
+            $entities[] = [
+                '@type'          => 'Question',
+                'name'           => $faq->getQuestion(),
+                // getAnswer(), so the price token is substituted here exactly as
+                // it is on the page.
+                'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq->getAnswer()],
+            ];
+        }
+
+        return [
+            '@type'      => 'FAQPage',
+            '@id'        => $this->canonicalUrl() . '#faq',
+            'mainEntity' => $entities,
+            'isPartOf'   => ['@id' => $this->canonicalUrl() . '#webpage'],
+        ];
+    }
+
     // ------------------------------------------------------------- components
 
     /**
@@ -290,14 +361,65 @@ final class StructuredData extends AbstractBlock
 
             // Only when the photograph is really on disk. A schema image
             // pointing at a 404 is a validation error in Search Console.
-            if (is_file(BP . '/pub/' . ltrim($person['photo'], '/'))) {
-                $node['image'] = $base . $this->getStaticUrl($person['photo']);
+            //
+            // A full ImageObject rather than a bare URL string. Both are valid,
+            // but the object carries a caption and real pixel dimensions, and
+            // those are what let Google associate this specific file with this
+            // specific person rather than treating it as decoration on a page
+            // that happens to mention them.
+            if ($image = $this->imageObject($person['photo'], $person['photo_caption'])) {
+                $node['image'] = $image;
             }
 
             $people[] = $node;
         }
 
         return $people;
+    }
+
+    /**
+     * An ImageObject for a file under pub/, or null if it is not there.
+     *
+     * Dimensions are read from the file rather than declared, so they cannot go
+     * stale when an image is replaced with one of a different size. getimagesize
+     * is a header read, not a decode, and the result is memoised per request
+     * because the same three founders appear in the graph on every page.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function imageObject(string $path, string $caption = ''): ?array
+    {
+        static $cache = [];
+
+        $path = ltrim($path, '/');
+        $file = BP . '/pub/' . $path;
+
+        if (array_key_exists($path, $cache)) {
+            return $cache[$path];
+        }
+
+        if (!is_file($file)) {
+            return $cache[$path] = null;
+        }
+
+        $node = [
+            '@type'      => 'ImageObject',
+            'url'        => $this->baseUrl() . $this->getStaticUrl($path),
+            'contentUrl' => $this->baseUrl() . $this->getStaticUrl($path),
+        ];
+
+        $size = @getimagesize($file);
+
+        if (is_array($size)) {
+            $node['width']  = $size[0];
+            $node['height'] = $size[1];
+        }
+
+        if ($caption !== '') {
+            $node['caption'] = $caption;
+        }
+
+        return $cache[$path] = $node;
     }
 
     /**

@@ -57,6 +57,18 @@ return [
         'template'    => 'EcoLife_Cms::page/services.phtml',
         'body_class'  => 'page-services',
     ],
+    'faq' => [
+        // Aimed at the question half of the query space -- "solar panel price
+        // in satara", "pm surya ghar subsidy", "how much roof space for 3kw".
+        // Those are separate searches from "solar in Satara", which is why this
+        // gets its own page rather than being folded into one that already
+        // targets something else.
+        'title'       => 'Solar Panel Price & Subsidy in Satara | FAQ',
+        'description' => 'What rooftop solar costs in Satara, the PM Surya Ghar subsidy, roof '
+                       . 'space needed, MSEDCL net metering and maintenance - answered plainly.',
+        'template'    => 'EcoLife_Cms::page/faq.phtml',
+        'body_class'  => 'page-faq',
+    ],
     'contact' => [
         'title'       => 'Contact Eco Life Solar, Satara | Free Site Visit',
         'description' => 'Tell us about your roof and your electricity bill and we will arrange '

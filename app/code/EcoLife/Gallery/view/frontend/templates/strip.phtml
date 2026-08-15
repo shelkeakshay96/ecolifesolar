@@ -41,7 +41,7 @@ if ($items === []) {
                                           transition hover:border-gold-400 hover:shadow-eco">
                     <span class="block aspect-[4/3] overflow-hidden bg-pearl-dim">
                         <img src="<?= $block->escapeUrl($block->getMediaUrl((string) ($item->getData('thumbnail_path') ?: $item->getImagePath()))) ?>"
-                             alt="<?= $block->escapeHtmlAttr($item->getTitle()) ?>"
+                             alt="<?= $block->escapeHtmlAttr($item->getTitle() . ($meta ? ' - ' . implode(', ', $meta) : '')) ?>"
                              class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                              loading="lazy">
                     </span>

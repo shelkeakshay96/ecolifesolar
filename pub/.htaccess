@@ -21,15 +21,20 @@
     # from "/" (see Core/App/Url.php), so it must be served from a domain
     # root, not a subdirectory.
 
-    # Force HTTPS. DELIBERATELY OFF UNTIL THE CERTIFICATE IS LIVE.
+    # Force HTTPS. ON: the certificate is live and verified.
     #
-    # Redirecting to https:// before a certificate exists does not degrade to
-    # http -- the browser refuses the connection and the site is simply down,
-    # including the admin panel needed to fix it. Load the site over https
-    # once and see a padlock, THEN uncomment these three lines.
-    # RewriteCond %{HTTPS} !=on
-    # RewriteCond %{HTTP:X-Forwarded-Proto} !=https
-    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # The condition this was waiting for has been met -- https://ecolifegrp.com
+    # serves a valid certificate, and the host is already 301ing http to https
+    # ahead of PHP. This rule is therefore belt-and-braces rather than the only
+    # thing doing the job, and it is worth having for exactly that reason: it is
+    # what keeps the guarantee if the site moves to a host that does not.
+    #
+    # It matters for search as well as for security. http:// and https:// are
+    # two different addresses to a crawler, and a page reachable on both is a
+    # page whose signals are split between them.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Real files and directories are served directly: CSS, JS, fonts, and
     # everything under media/.

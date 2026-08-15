@@ -52,6 +52,11 @@ $current = $block->getCategory();
             <div class="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3" data-reveal-stagger="80">
                 <?php foreach ($items as $item): ?>
                     <?php $meta = array_filter([$item->getSizeLabel(), $item->getLocation(), $item->getCategoryLabel()]); ?>
+                    <?php /* alt gets the size and town, not just the title. "Rooftop install" says
+                             nothing to image search; "Rooftop install - 5 kW, Karad" is the phrase
+                             somebody actually types. Built from $meta so it cannot disagree with
+                             the caption shown under the photograph. */ ?>
+                    <?php $alt = $item->getTitle() . ($meta ? ' - ' . implode(', ', $meta) : ''); ?>
                     <figure class="reveal">
                         <?php if ($item->imageExists()): ?>
                             <button type="button"
@@ -63,7 +68,7 @@ $current = $block->getCategory();
                                     data-lightbox-caption="<?= $block->escapeHtmlAttr($item->getTitle() . ($meta ? ' — ' . implode(' · ', $meta) : '')) ?>">
                                 <span class="sr-only">View <?= $block->escapeHtml($item->getTitle()) ?> full size</span>
                                 <img src="<?= $block->escapeUrl($block->getMediaUrl((string) ($item->getData('thumbnail_path') ?: $item->getImagePath()))) ?>"
-                                     alt="<?= $block->escapeHtmlAttr($item->getTitle()) ?>"
+                                     alt="<?= $block->escapeHtmlAttr($alt) ?>"
                                      class="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-105"
                                      loading="lazy">
                                 <span class="pointer-events-none absolute right-3 top-3 flex h-9 w-9 items-center justify-center
