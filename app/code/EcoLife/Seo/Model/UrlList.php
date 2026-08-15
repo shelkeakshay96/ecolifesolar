@@ -116,9 +116,16 @@ final class UrlList
                 continue;
             }
 
+            // Both forms of the name, for the same reason the alt text carries
+            // both: "Sahil Pawar" is the way people search and "Sahil Udyasingh
+            // Pawar" is the way the page, the schema and his own paperwork
+            // spell it, and neither contains the other as a phrase.
+            $short = (string) ($person['short_name'] ?? '');
+            $full  = (string) $person['name'];
+
             $images[] = [
                 'loc'     => $baseUrl . $this->context->getUrl()->getStaticUrl($path),
-                'title'   => (string) $person['name'],
+                'title'   => $short !== '' && $short !== $full ? "{$short} ({$full})" : $full,
                 'caption' => (string) ($person['photo_caption'] ?? ''),
             ];
         }

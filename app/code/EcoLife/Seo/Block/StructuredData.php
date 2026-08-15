@@ -359,6 +359,15 @@ final class StructuredData extends AbstractBlock
                 'url'      => $base . '/about',
             ];
 
+            // "Sahil Pawar" is not a substring of "Sahil Udyasingh Pawar", so a
+            // search for the short form has nothing to match against the formal
+            // one. alternateName is the supported way to state that both
+            // strings are the same person -- the same mechanism the
+            // Organization node uses for the brand spellings.
+            if (($person['short_name'] ?? '') !== '' && $person['short_name'] !== $person['name']) {
+                $node['alternateName'] = $person['short_name'];
+            }
+
             // Only when the photograph is really on disk. A schema image
             // pointing at a 404 is a validation error in Search Console.
             //
