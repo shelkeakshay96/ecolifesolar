@@ -253,7 +253,27 @@ final class Page extends AbstractBlock
      * is actually there and falls back to a monogram, so this array is correct
      * whether or not the photographs have been supplied yet.
      *
-     * @return list<array{name: string, role: string, credential: string, photo: string}>
+     * Three of the keys here exist for image search rather than for the page,
+     * and they are worth explaining because they look redundant next to `name`:
+     *
+     *   The FILENAME is a ranking signal in its own right. These were
+     *   sahil.jpg and piyush.jpg, which tell a crawler nothing -- the file is
+     *   now named the way somebody would search for the person in it. Renaming
+     *   an indexed image costs its accumulated history, so this is a thing to
+     *   get right once rather than iterate on.
+     *
+     *   `photo_alt` is the strongest signal Google has for what an image
+     *   depicts. It was previously just the name, which is accurate but
+     *   isolated; naming the role and the town ties the face to the same
+     *   entity the JSON-LD describes.
+     *
+     *   `photo_caption` goes into the image sitemap, not the page. It is
+     *   separate from photo_alt because alt text is read aloud by screen
+     *   readers and should stay short, while a caption has room to be
+     *   specific.
+     *
+     * @return list<array{name: string, role: string, credential: string, photo: string,
+     *                    photo_alt: string, photo_caption: string}>
      */
     public function getTeam(): array
     {
@@ -262,19 +282,30 @@ final class Page extends AbstractBlock
              'role'       => 'Founder, Eco Life Group',
              'credential' => 'B.E. Chemical Engineering. Twenty years in business, and the person '
                            . 'who laid the foundation the rest of this is built on.',
-             'photo'      => 'images/team/udyasingh.jpg'],
+             'photo'      => 'images/team/udyasingh-pawar-solar-satara.jpg',
+             'photo_alt'  => 'Udyasingh Pawar, founder of Eco Life Group, solar company in Satara',
+             'photo_caption' => 'Udyasingh Naryanrao Pawar, founder of Eco Life Group, the '
+                              . 'Satara renewable energy business he started in 2002.'],
             ['name'       => 'Sahil Udyasingh Pawar',
              'role'       => 'Founder, Eco Life Green Infra LLP',
              'credential' => 'M.A. Psychology. Six years in solar. Looks after customer '
                            . 'relationships and project execution, so he is usually the one on '
                            . 'your roof.',
-             'photo'      => 'images/team/sahil.jpg'],
+             'photo'      => 'images/team/sahil-pawar-solar-satara.jpg',
+             'photo_alt'  => 'Sahil Pawar, founder of Eco Life Green Infra LLP, solar installer '
+                           . 'in Satara',
+             'photo_caption' => 'Sahil Pawar, founder of Eco Life Green Infra LLP, who runs '
+                              . 'rooftop solar project execution across Satara district.'],
             ['name'       => 'Piyush Udyasingh Pawar',
              'role'       => 'Co-Founder, Eco Life Green Infra LLP',
              'credential' => 'B.Com, Business Administration and Finance. Eight years across '
                            . 'solar and other sectors. Handles business management and financial '
                            . 'planning.',
-             'photo'      => 'images/team/piyush.jpg'],
+             'photo'      => 'images/team/piyush-pawar-solar-satara.jpg',
+             'photo_alt'  => 'Piyush Pawar, co-founder of Eco Life Green Infra LLP, solar '
+                           . 'company in Satara',
+             'photo_caption' => 'Piyush Pawar, co-founder of Eco Life Green Infra LLP, who '
+                              . 'handles business management for the Satara solar business.'],
         ];
     }
 

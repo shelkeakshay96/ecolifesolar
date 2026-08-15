@@ -16,12 +16,20 @@ $phones   = $block->getContactNumbers();
 $business = $block->getSetting('general/business/name', 'Eco Life');
 $current  = $block->getRequest()->getPathInfo();
 
+/*
+ * One array, rendered twice -- the desktop bar and the mobile drawer both loop
+ * over it. That matters: the Blog stub that used to sit here was hardcoded
+ * after the desktop loop instead of being a member of this array, so it existed
+ * on wide screens and silently did not exist on phones, which is most of this
+ * audience. Anything that belongs in the navigation belongs in here.
+ */
 $links = [
     '/'           => 'Home',
     '/services'   => 'Solutions',
     '/about'      => 'Why Eco Life',
     '/calculator' => 'Calculator',
     '/gallery'    => 'Our Work',
+    '/faq'        => 'FAQ',
     '/contact'    => 'Contact',
 ];
 ?>
@@ -44,7 +52,6 @@ $links = [
                     <?= $block->escapeHtml($label) ?>
                 </a>
             <?php endforeach; ?>
-            <a href="#" class="nav-link text-[.83rem] text-pine-100 hover:text-pearl" data-soon="Blog">Blog</a>
         </nav>
 
         <div class="flex items-center gap-3">

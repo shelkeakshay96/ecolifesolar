@@ -4,11 +4,33 @@
  *
  * Deliberately plainer than the public site: this is a working tool for three
  * people, and every pixel spent on decoration is a pixel not spent on the lead
- * list. The navigation and the signed-in user strip arrive in step 7, once
- * there is an authenticated session to read them from.
+ * list.
  *
  * @var \EcoLife\Core\View\Result\Layout $block
  */
+
+/*
+ * The header renders only for someone actually signed in.
+ *
+ * On the login, forgot-password and reset screens it was showing Dashboard,
+ * Leads, Gallery, Testimonials and Settings to a visitor who cannot open any of
+ * them -- every one of those links just bounces back to the login page. It also
+ * advertised the shape of the admin panel to anyone who found the URL.
+ *
+ * The test is authentication rather than "is this the login page", because
+ * that is the actual condition: a third guest-accessible screen added later
+ * gets the right behaviour without anyone remembering to opt in.
+ *
+ * getUser() rather than isLoggedIn(): isLoggedIn() rewrites the idle-timeout
+ * timestamp, and a layout deciding whether to draw a nav bar has no business
+ * extending anybody's session as a side effect. On this page it costs nothing
+ * either way -- with no session key there is no query to make.
+ *
+ * class_exists keeps EcoLife_Theme free of a hard dependency on
+ * EcoLife_Backend, which it does not sequence after.
+ */
+$signedIn = class_exists(\EcoLife\Backend\Model\Auth::class)
+    && (new \EcoLife\Backend\Model\Auth($block->getContext()))->getUser() !== null;
 ?>
 <!doctype html>
 <html lang="en-IN" class="h-full">
@@ -20,7 +42,9 @@
 </head>
 <body class="flex min-h-full flex-col bg-slate-100 text-slate-700 antialiased <?= $block->escapeHtmlAttr($block->getBodyClass()) ?>">
 
-    <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/admin-header.phtml') ?>
+    <?php if ($signedIn): ?>
+        <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/admin-header.phtml') ?>
+    <?php endif; ?>
 
     <main class="flex-1">
         <?= $block->renderChild(\EcoLife\Core\View\Element\Template::class, 'EcoLife_Theme::html/messages.phtml', [

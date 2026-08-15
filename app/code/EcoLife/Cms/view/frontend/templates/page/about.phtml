@@ -88,8 +88,12 @@ $principles = [
             <?php foreach ($block->getTeam() as $person): ?>
                 <article class="reveal card card-lift">
                     <?php if ($block->hasStaticFile($person['photo'])): ?>
+                        <?php /* alt names the person, the role and the town. It was the bare
+                                 name, which is correct but says nothing that ties this face to
+                                 this business -- and alt text is the single strongest signal
+                                 Google Images has for what a photograph depicts. */ ?>
                         <img src="<?= $block->escapeUrl($block->getStaticUrl($person['photo'])) ?>"
-                             alt="<?= $block->escapeHtmlAttr($person['name']) ?>"
+                             alt="<?= $block->escapeHtmlAttr($person['photo_alt']) ?>"
                              class="mb-5 aspect-[4/5] w-full rounded-xl border border-sand object-cover object-top"
                              loading="lazy" width="400" height="500">
                     <?php else: ?>

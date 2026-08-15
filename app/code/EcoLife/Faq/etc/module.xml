@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+    The questions on /faq, managed from the admin panel.
+
+    These started life as a PHP array in Cms/etc/faq.php. That was the wrong
+    home for two reasons. The family cannot edit files, so every correction to a
+    price or a wording needed a developer and a deploy. And EcoLife_Cms declares
+    as an invariant that it owns no database table and never will, so once the
+    content needed to be editable it could not stay there.
+
+    The SEO properties that made the static version work are preserved
+    deliberately, because they are easy to lose in a move to a database:
+
+      The answers are rendered server side into the HTML. They are not fetched,
+      not templated in the browser, and not hidden behind a script. A crawler
+      reads the markup, and an accordion that builds its content on click ships
+      a page with no answers on it.
+
+      EcoLife_Seo builds the FAQPage node from this same table, so the
+      structured data cannot describe questions the page does not show.
+-->
+<module name="EcoLife_Faq" setup_version="1.0.0">
+    <sequence>
+        <module name="EcoLife_Core"/>
+        <module name="EcoLife_Theme"/>
+        <module name="EcoLife_Backend"/>
+    </sequence>
+</module>

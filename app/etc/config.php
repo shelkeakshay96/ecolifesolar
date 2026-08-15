@@ -32,5 +32,6 @@ return [
         'EcoLife_Gallery'     => 1,
         'EcoLife_Testimonial' => 1,
         'EcoLife_Seo'         => 1,
+        'EcoLife_Faq'         => 1,
     ],
 ];

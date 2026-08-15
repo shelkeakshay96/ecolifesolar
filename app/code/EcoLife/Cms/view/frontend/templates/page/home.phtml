@@ -175,9 +175,27 @@ $featured = array_shift($services);
         <?php endforeach; ?>
     </div>
 
-    <div class="mt-8">
+    <?php /*
+        The anchor text on each of these is deliberate, because anchor text
+        describes the TARGET page rather than this one.
+
+        The Satara link reads "installation in Satara city", not "solar in
+        Satara" -- the city page is aimed one level narrower than this page, and
+        pointing the exact phrase this page is trying to rank for at a different
+        URL would hand it away.
+
+        The FAQ link leads with price, because that is what that page answers
+        and what people search for.
+    */ ?>
+    <div class="mt-8 flex flex-wrap gap-x-6 gap-y-2">
         <a href="/services" class="font-mono text-[.8rem] text-pine-500 underline-offset-4 hover:underline">
             More about what we install →
+        </a>
+        <a href="/solar-in-satara" class="font-mono text-[.8rem] text-pine-500 underline-offset-4 hover:underline">
+            Solar installation in Satara city →
+        </a>
+        <a href="/faq" class="font-mono text-[.8rem] text-pine-500 underline-offset-4 hover:underline">
+            What rooftop solar costs, and the subsidy →
         </a>
     </div>
 </section>

@@ -1,0 +1,110 @@
+<?php
+/**
+ * The FAQ landing page: hero, questions, local links, closing CTA.
+ *
+ * The questions themselves belong to EcoLife_Faq and come from the faq table,
+ * managed at /admin/faqs. This page owns the frame around them and nothing
+ * else, which is why the list arrives through renderChild() rather than being
+ * looped over here.
+ *
+ * EcoLife_Seo reads the same table for the FAQPage node, so the structured data
+ * and the visible page cannot describe different questions.
+ *
+ * @var \EcoLife\Cms\Block\Page $block
+ */
+$whatsapp = $block->getWhatsappLink();
+$phones   = $block->getContactNumbers();
+?>
+<section class="relative overflow-hidden border-b border-gold-300/30 bg-pine-900">
+    <div class="absolute inset-0 scale-110 bg-cover bg-center opacity-20"
+         style="background-image:url('<?= $block->escapeUrl($block->getStaticUrl('images/panels.jpg')) ?>')"
+         data-parallax="0.08" aria-hidden="true"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-pine-900/85 to-pine-900" aria-hidden="true"></div>
+
+    <div class="section-shell relative z-10 max-w-3xl py-20 lg:py-24" data-leaf-zone>
+        <p class="eyebrow reveal text-gold-300">Questions</p>
+        <h1 class="reveal mt-3 text-4xl text-pearl sm:text-5xl" data-word-reveal>
+            Solar in Satara, <em class="italic text-gold-300">answered.</em>
+        </h1>
+        <div class="gold-rule"></div>
+        <p class="reveal max-w-2xl text-[1.02rem] leading-relaxed text-pine-100/90">
+            What it costs, what the subsidy covers, how much roof you need and how long the
+            paperwork takes. These are the things people ask us on the phone before they book a
+            survey, written down so you can read them first.
+        </p>
+        <p class="reveal mt-4 max-w-2xl text-[.92rem] leading-relaxed text-pine-100/70">
+            If your question is not here, ask it. We would rather answer once properly than
+            have you guess.
+        </p>
+
+        <div class="reveal mt-9 flex flex-wrap gap-4">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.2">Ask us directly</a>
+            <a href="/calculator" class="btn-outline">Estimate your system</a>
+        </div>
+    </div>
+</section>
+
+<?php /* =========================================================== answers */ ?>
+<section class="bg-white">
+    <div class="section-shell py-16 lg:py-20">
+        <?= $block->renderChild(\EcoLife\Faq\Block\Faqs::class, 'EcoLife_Faq::faqs.phtml') ?>
+    </div>
+</section>
+
+<?php /* ==================================================== where we work */ ?>
+<?php /* Links out to the four town pages. A FAQ page collects links from every
+         page in the site through the header, so it accumulates authority --
+         passing some of that on to the local pages is the point of putting it
+         here rather than leaving it as a dead end. */ ?>
+<section class="border-y border-sand bg-pearl">
+    <div class="section-shell py-14">
+        <div class="reveal max-w-2xl">
+            <p class="eyebrow">Satara district</p>
+            <h2 class="mt-3 text-2xl sm:text-3xl">Where these answers apply</h2>
+            <p class="mt-3 text-[.92rem] leading-relaxed text-muted">
+                We install across Satara district. Each of these pages covers what is different
+                about working in that town.
+            </p>
+        </div>
+
+        <div class="mt-7 flex flex-wrap gap-3" data-reveal-stagger="70">
+            <?php foreach ($block->getServiceAreas() as $identifier => $area): ?>
+                <a href="<?= $block->escapeUrl('/' . $identifier) ?>"
+                   class="reveal rounded-full border border-sand bg-white px-5 py-2.5 text-[.9rem] font-semibold
+                          text-ink transition hover:border-gold-400 hover:text-pine-600">
+                    Solar in <?= $block->escapeHtml($area['town']) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<?php /* =============================================================== cta */ ?>
+<section class="bg-pine-900">
+    <div class="section-shell max-w-3xl py-16 text-center lg:py-20" data-leaf-zone>
+        <h2 class="reveal mx-auto max-w-[24ch] text-3xl text-pearl sm:text-4xl">
+            Still not sure what your roof would take?
+        </h2>
+        <p class="reveal mx-auto mt-4 max-w-xl text-[.95rem] leading-relaxed text-pine-100/80">
+            The survey is free and there is no obligation at the end of it. If solar is a poor
+            fit for your roof, we will tell you that.
+        </p>
+
+        <div class="reveal mt-8 flex flex-wrap justify-center gap-4">
+            <a href="/contact" class="btn-gold btn-wide" data-magnetic="0.2">Book a free site visit</a>
+            <?php if ($whatsapp !== ''): ?>
+                <a href="<?= $block->escapeUrl($whatsapp) ?>" target="_blank" rel="noopener"
+                   class="btn-outline">Message us on WhatsApp</a>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($phones !== []): ?>
+            <p class="reveal mt-6 text-[.88rem] text-pine-100/70">
+                Or call
+                <?php foreach ($phones as $index => $phone): ?><?= $block->escapeHtml($index > 0 ? ' or ' : ' ') ?><a
+                    href="tel:<?= $block->escapeHtmlAttr($phone['dial']) ?>"
+                    class="font-mono font-semibold text-gold-300 underline-offset-4 hover:underline"><?= $block->escapeHtml($phone['display']) ?></a><?php endforeach; ?>.
+            </p>
+        <?php endif; ?>
+    </div>
+</section>
