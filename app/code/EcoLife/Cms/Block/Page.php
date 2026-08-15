@@ -263,47 +263,58 @@ final class Page extends AbstractBlock
      *   get right once rather than iterate on.
      *
      *   `photo_alt` is the strongest signal Google has for what an image
-     *   depicts. It was previously just the name, which is accurate but
-     *   isolated; naming the role and the town ties the face to the same
-     *   entity the JSON-LD describes.
+     *   depicts. It names the role and the town, tying the face to the same
+     *   entity the JSON-LD describes -- and it carries BOTH forms of the name.
+     *
+     *   `short_name` is why. These men are searched for as "Sahil Pawar" far
+     *   more often than as "Sahil Udyasingh Pawar", but the formal name is what
+     *   the page, the sitemap title and the schema all use, and "Sahil Pawar"
+     *   is not a contiguous substring of it. Carrying both means neither query
+     *   depends on a search engine inferring that the middle name is optional.
+     *   It also feeds schema.org alternateName, which is the supported way of
+     *   saying two strings are the same person.
      *
      *   `photo_caption` goes into the image sitemap, not the page. It is
      *   separate from photo_alt because alt text is read aloud by screen
      *   readers and should stay short, while a caption has room to be
      *   specific.
      *
-     * @return list<array{name: string, role: string, credential: string, photo: string,
-     *                    photo_alt: string, photo_caption: string}>
+     * @return list<array{name: string, short_name: string, role: string, credential: string,
+     *                    photo: string, photo_alt: string, photo_caption: string}>
      */
     public function getTeam(): array
     {
         return [
             ['name'       => 'Udyasingh Naryanrao Pawar',
+             'short_name' => 'Udyasingh Pawar',
              'role'       => 'Founder, Eco Life Group',
              'credential' => 'B.E. Chemical Engineering. Twenty years in business, and the person '
                            . 'who laid the foundation the rest of this is built on.',
              'photo'      => 'images/team/udyasingh-pawar-solar-satara.jpg',
-             'photo_alt'  => 'Udyasingh Pawar, founder of Eco Life Group, solar company in Satara',
+             'photo_alt'  => 'Udyasingh Pawar (Udyasingh Naryanrao Pawar), founder of Eco Life '
+                           . 'Group, solar company in Satara',
              'photo_caption' => 'Udyasingh Naryanrao Pawar, founder of Eco Life Group, the '
                               . 'Satara renewable energy business he started in 2002.'],
             ['name'       => 'Sahil Udyasingh Pawar',
+             'short_name' => 'Sahil Pawar',
              'role'       => 'Founder, Eco Life Green Infra LLP',
              'credential' => 'M.A. Psychology. Six years in solar. Looks after customer '
                            . 'relationships and project execution, so he is usually the one on '
                            . 'your roof.',
              'photo'      => 'images/team/sahil-pawar-solar-satara.jpg',
-             'photo_alt'  => 'Sahil Pawar, founder of Eco Life Green Infra LLP, solar installer '
-                           . 'in Satara',
+             'photo_alt'  => 'Sahil Pawar (Sahil Udyasingh Pawar), founder of Eco Life Green '
+                           . 'Infra LLP, solar installer in Satara',
              'photo_caption' => 'Sahil Pawar, founder of Eco Life Green Infra LLP, who runs '
                               . 'rooftop solar project execution across Satara district.'],
             ['name'       => 'Piyush Udyasingh Pawar',
+             'short_name' => 'Piyush Pawar',
              'role'       => 'Co-Founder, Eco Life Green Infra LLP',
              'credential' => 'B.Com, Business Administration and Finance. Eight years across '
                            . 'solar and other sectors. Handles business management and financial '
                            . 'planning.',
              'photo'      => 'images/team/piyush-pawar-solar-satara.jpg',
-             'photo_alt'  => 'Piyush Pawar, co-founder of Eco Life Green Infra LLP, solar '
-                           . 'company in Satara',
+             'photo_alt'  => 'Piyush Pawar (Piyush Udyasingh Pawar), co-founder of Eco Life Green '
+                           . 'Infra LLP, solar company in Satara',
              'photo_caption' => 'Piyush Pawar, co-founder of Eco Life Green Infra LLP, who '
                               . 'handles business management for the Satara solar business.'],
         ];
